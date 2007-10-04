@@ -1,0 +1,11 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This jelly script is used for per-project configuration.
+  -->
+  <f:entry title="Assign Ports to these enviroment variables"
+           description="Comma separated list of variables">
+    <input class="setting-input" name="portallocator.portVariables"
+      type="text" value="${instance.portVariables}"/>
+  </f:entry>
+  
+</j:jelly>
