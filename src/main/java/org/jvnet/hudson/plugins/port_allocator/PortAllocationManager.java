@@ -50,9 +50,9 @@ final class PortAllocationManager {
         if(higher <= lower)
             throw new IllegalArgumentException("Invalid range "+lower+":"+ higher);
 
-        int i = new Random().nextInt(lower) + (higher-lower);
+        int i = new Random().nextInt((higher-lower)) + lower;
         while( ports.contains(i) || isPortInUse(null,i)) {
-            i = new Random().nextInt(lower) + (higher-lower);
+            i = new Random().nextInt((higher-lower)) + lower;
         }
         ports.add(i);
         return i;
