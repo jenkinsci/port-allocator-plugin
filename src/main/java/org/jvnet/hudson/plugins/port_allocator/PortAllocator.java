@@ -4,6 +4,8 @@ import hudson.Launcher;
 import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
+import hudson.model.Executor;
+import hudson.model.Computer;
 import hudson.tasks.BuildWrapper;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -31,6 +33,9 @@ public class PortAllocator extends BuildWrapper
     public Environment setUp(Build build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         final String[] portVars = portVariables.split(" ");
 
+        Computer cur = Executor.currentExecutor().getOwner();
+
+        build.addAction();
 
         return new Environment() {
             @Override
