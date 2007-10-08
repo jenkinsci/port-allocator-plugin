@@ -19,7 +19,7 @@ public class PortAllocator extends BuildWrapper
     private final HashMap<String,Integer> portMap = new HashMap<String,Integer>();
     private final String portVariables;
 
-    public PortAllocator(String portVariables){
+    private PortAllocator(String portVariables){
         this.portVariables = portVariables;
     }
 
@@ -33,15 +33,16 @@ public class PortAllocator extends BuildWrapper
     public Environment setUp(Build build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         final String[] portVars = portVariables.split(" ");
 
-        Computer cur = Executor.currentExecutor().getOwner();
+        final Computer cur = Executor.currentExecutor().getOwner();
 
-        build.addAction();
+        //build.addAction();
 
         return new Environment() {
+            final PortAllocationManager pam = PortAllocationManager.getManager(cur);
             @Override
             public void buildEnvVars(Map<String, String> env) {
                 for(String portVar: portVars){
-                    int freeport = portManager.allocate();
+                    int freeport = pam.allocate(0);
                     portMap.put(portVar, freeport);
                     //set the environment variable
                     env.put(portVar, String.valueOf(freeport));
@@ -51,7 +52,7 @@ public class PortAllocator extends BuildWrapper
 
             public boolean tearDown(Build build, BuildListener listener) throws IOException, InterruptedException {
                 for(String portVar: portVars){
-                    portManager.free(portMap.get(portVar));
+                    pam.free(portMap.get(portVar));
                     portMap.remove(portVar);
                 }
                 return true;
@@ -63,11 +64,6 @@ public class PortAllocator extends BuildWrapper
         return DESCRIPTOR;
     }
 
-
-    /**
-     * Manages ports in use.
-     */
-    private static final PortAllocationManager portManager = new PortAllocationManager();
 
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 

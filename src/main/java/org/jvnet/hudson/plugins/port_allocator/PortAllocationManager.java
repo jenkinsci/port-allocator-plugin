@@ -8,9 +8,9 @@ import java.lang.ref.WeakReference;
 import java.net.ServerSocket;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.WeakHashMap;
+
 
 /**
  * Manages ports in use.
@@ -33,31 +33,52 @@ final class PortAllocationManager {
         this.node = node;
     }
 
-    public synchronized int allocate() {
+    /**
+     * Allocates a port on the Computer where the jobs gets executed.
+     * @param port
+     * @return a free port if port =0
+     *          else assigns the requested port if free.
+     */
+    public synchronized int allocate(int port) {
         try {
-            int i = findFreePort();
+            int i = allocatePort(port);
+            if(port != 0) {
+                while(ports.contains(i)) {
+                    //alocate new port.
+                    i = allocatePort(port);
+                }
+            }
             ports.add(i);
             return i;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    public static PortAllocationManager getManager(Computer node) {
+        PortAllocationManager pam = INSTANCES.get(node).get();
+        if( pam == null) {
+            pam = new PortAllocationManager(node);
+            INSTANCES.put(node, new WeakReference<PortAllocationManager>(pam));            
+        }
+        return pam;
     }
 
     public synchronized void free(int n) {
         //Check if port is still in use
-        if(!isPortInUse(n)) {
-            ports.remove(n);
+        try {
+            if(!isPortInUse(n)) {
+                ports.remove(n);
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private static int findFreePort()
-            throws IOException {
-        ServerSocket server = new ServerSocket(0);
-        int port = server.getLocalPort();
-        server.close();
-        return port;
-    }
 
+    /*
     private synchronized int allocateInRange(int lower, int higher) {
         if(higher <= lower)
             throw new IllegalArgumentException("Invalid range "+lower+":"+ higher);
@@ -69,7 +90,7 @@ final class PortAllocationManager {
         ports.add(i);
         return i;
     }
-
+    */
     private boolean isPortInUse(final int port) throws InterruptedException {
         try {
             return node.getChannel().call(new Callable<Boolean,IOException>() {
@@ -81,5 +102,23 @@ final class PortAllocationManager {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    /**
+     *
+     * @param port 0 to assign a free port
+     * @return port that gets assigned
+     * @throws InterruptedException
+     * @throws IOException
+     */
+    private int allocatePort(final int port) throws InterruptedException, IOException {
+        return node.getChannel().call(new Callable<Integer,IOException>() {
+                public Integer call() throws IOException {
+                    ServerSocket server = new ServerSocket(port);
+                    int localPort = server.getLocalPort();
+                    server.close();
+                    return localPort;
+                }
+            });
     }
 }
