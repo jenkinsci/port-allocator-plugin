@@ -58,11 +58,15 @@ final class PortAllocationManager {
     }
 
     public static PortAllocationManager getManager(Computer node) {
-        PortAllocationManager pam = INSTANCES.get(node).get();
-        if( pam == null) {
-            pam = new PortAllocationManager(node);
-            INSTANCES.put(node, new WeakReference<PortAllocationManager>(pam));            
+        PortAllocationManager pam;
+        WeakReference<PortAllocationManager> ref= INSTANCES.get(node);
+        if( ref != null) {
+            pam = ref.get();
+            if(pam != null)
+                return pam;
         }
+        pam = new PortAllocationManager(node);
+        INSTANCES.put(node, new WeakReference<PortAllocationManager>(pam));
         return pam;
     }
 
