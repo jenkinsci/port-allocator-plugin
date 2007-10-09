@@ -3,9 +3,10 @@ package org.jvnet.hudson.plugins.port_allocator;
 import hudson.Launcher;
 import hudson.model.Build;
 import hudson.model.BuildListener;
+import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Executor;
-import hudson.model.Computer;
+import hudson.model.ResourceActivity;
 import hudson.tasks.BuildWrapper;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -14,9 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class PortAllocator extends BuildWrapper
+public class PortAllocator extends BuildWrapper /* implements ResourceActivity */
 {
-    private final HashMap<String,Integer> portMap = new HashMap<String,Integer>();
     private final String portVariables;
 
     private PortAllocator(String portVariables){
@@ -35,10 +35,17 @@ public class PortAllocator extends BuildWrapper
 
         final Computer cur = Executor.currentExecutor().getOwner();
 
-        //build.addAction();
+        AllocatedPortAction prevAlloc = build.getPreviousBuild().getAction(AllocatedPortAction.class);
+
+        final PortAllocationManager pam = PortAllocationManager.getManager(cur);
+        final HashMap<String,Integer> portMap = new HashMap<String,Integer>();
+
+        // TODO: allocation here
+
+        build.addAction(new AllocatedPortAction(portMap));
 
         return new Environment() {
-            final PortAllocationManager pam = PortAllocationManager.getManager(cur);
+
             @Override
             public void buildEnvVars(Map<String, String> env) {
                 for(String portVar: portVars){
