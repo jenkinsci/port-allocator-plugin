@@ -9,22 +9,25 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 public class AllocatedPortAction implements Action {
+    private final Map<String, Integer> portMap;
+
     public AllocatedPortAction(Map<String, Integer> portMap) {
-        // TODO
+        this.portMap = portMap;
     }
 
     public String getIconFileName() {
-        // TODO
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     public String getDisplayName() {
-        // TODO
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     public String getUrlName() {
-        // TODO
-        throw new UnsupportedOperationException();
+        return "allocatedPorts";
+    }
+
+    Map<String, Integer> getPreviousAllocatedPorts() {
+        return portMap;
     }
 }

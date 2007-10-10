@@ -35,17 +35,33 @@ final class PortAllocationManager {
 
     /**
      * Allocates a port on the Computer where the jobs gets executed.
+     *
      * @param port
-     * @return a free port if port =0
-     *          else assigns the requested port if free.
+     * @param prefPort Preffered Port
+     * @return if port =0
+     *         tries to assign the preffered port, if the preffered
+     *         port is not available assigns a random available port
+     *         else
+     *         assigns the requested port if free or waits on it
      */
-    public synchronized int allocate(int port) {
+    public synchronized int allocate(int port, int prefPort) {
         try {
-            int i = allocatePort(port);
-            if(port != 0) {
-                while(ports.contains(i)) {
-                    //alocate new port.
+            int i;
+            if (port == 0) {
+                try {
+                    // try to allocate preferential Port,
+                    i = allocatePort(prefPort);
+                } catch (IOException ex) {
+                    // if not available assign a free port
+                    i = allocatePort(0);
+                }
+            } else {
+                try {
                     i = allocatePort(port);
+                } catch (IOException ex) {
+                    //TODO Requested Port is not available, wait for it
+                    // change this, for now assign a  free port
+                    i = allocatePort(0);
                 }
             }
             ports.add(i);
@@ -59,10 +75,10 @@ final class PortAllocationManager {
 
     public static PortAllocationManager getManager(Computer node) {
         PortAllocationManager pam;
-        WeakReference<PortAllocationManager> ref= INSTANCES.get(node);
-        if( ref != null) {
+        WeakReference<PortAllocationManager> ref = INSTANCES.get(node);
+        if (ref != null) {
             pam = ref.get();
-            if(pam != null)
+            if (pam != null)
                 return pam;
         }
         pam = new PortAllocationManager(node);
@@ -73,7 +89,7 @@ final class PortAllocationManager {
     public synchronized void free(int n) {
         //Check if port is still in use
         try {
-            if(!isPortInUse(n)) {
+            if (!isPortInUse(n)) {
                 ports.remove(n);
             }
         } catch (InterruptedException e) {
@@ -82,22 +98,9 @@ final class PortAllocationManager {
     }
 
 
-    /*
-    private synchronized int allocateInRange(int lower, int higher) {
-        if(higher <= lower)
-            throw new IllegalArgumentException("Invalid range "+lower+":"+ higher);
-
-        int i = new Random().nextInt((higher-lower)) + lower;
-        while( ports.contains(i) || isPortInUse(i)) {
-            i = new Random().nextInt((higher-lower)) + lower;
-        }
-        ports.add(i);
-        return i;
-    }
-    */
     private boolean isPortInUse(final int port) throws InterruptedException {
         try {
-            return node.getChannel().call(new Callable<Boolean,IOException>() {
+            return node.getChannel().call(new Callable<Boolean, IOException>() {
                 public Boolean call() throws IOException {
                     new ServerSocket(port).close();
                     return true;
@@ -109,20 +112,19 @@ final class PortAllocationManager {
     }
 
     /**
-     *
      * @param port 0 to assign a free port
      * @return port that gets assigned
      * @throws InterruptedException
      * @throws IOException
      */
     private int allocatePort(final int port) throws InterruptedException, IOException {
-        return node.getChannel().call(new Callable<Integer,IOException>() {
-                public Integer call() throws IOException {
-                    ServerSocket server = new ServerSocket(port);
-                    int localPort = server.getLocalPort();
-                    server.close();
-                    return localPort;
-                }
-            });
+        return node.getChannel().call(new Callable<Integer, IOException>() {
+            public Integer call() throws IOException {
+                ServerSocket server = new ServerSocket(port);
+                int localPort = server.getLocalPort();
+                server.close();
+                return localPort;
+            }
+        });
     }
 }

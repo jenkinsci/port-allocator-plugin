@@ -14,7 +14,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * Allocates TCP Ports on a Computer for consumption and sets it as
+ * envioronet variables, see configuration
+ *
+ * This just mediates between different Jobs running on the same Computer
+ * by assigning free ports and its the jobs responsibility to open and close the ports.   
+ *
+ * @author Rama Pulavarthi
+ */
 public class PortAllocator extends BuildWrapper /* implements ResourceActivity */
 {
     private final String portVariables;
@@ -34,25 +42,40 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
         final String[] portVars = portVariables.split(" ");
 
         final Computer cur = Executor.currentExecutor().getOwner();
-
         AllocatedPortAction prevAlloc = build.getPreviousBuild().getAction(AllocatedPortAction.class);
 
+        Map<String,Integer> prefPortMap = new HashMap<String,Integer>();
+        if(prevAlloc != null){
+            // try to assign ports assigned in previous build
+            prefPortMap = prevAlloc.getPreviousAllocatedPorts();
+        }
         final PortAllocationManager pam = PortAllocationManager.getManager(cur);
-        final HashMap<String,Integer> portMap = new HashMap<String,Integer>();
-
-        // TODO: allocation here
-
+        final Map<String, Integer> portMap = new HashMap<String, Integer>();
+        for (String portVar : portVars) {
+            Integer port;
+            try {
+                //check if the users prefers port number
+                port = Integer.parseInt(portVar);
+                pam.allocate(port,0/* no pref*/);
+            } catch (NumberFormatException ex) {
+                port = pam.allocate(0,prefPortMap.get(portVar));
+            }
+            portMap.put(portVar, port);
+        }
         build.addAction(new AllocatedPortAction(portMap));
 
         return new Environment() {
 
             @Override
             public void buildEnvVars(Map<String, String> env) {
-                for(String portVar: portVars){
-                    int freeport = pam.allocate(0);
-                    portMap.put(portVar, freeport);
-                    //set the environment variable
-                    env.put(portVar, String.valueOf(freeport));
+                for (String portVar : portMap.keySet()) {
+                    try {
+                        //check if port variable is a port number, if so don't set env 
+                        Integer.parseInt(portVar);
+                    } catch (NumberFormatException ex) {
+                        env.put(portVar, portMap.get(portVar).toString());
+                    }
+
                 }
 
             }
