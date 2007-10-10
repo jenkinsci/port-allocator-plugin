@@ -59,7 +59,8 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
                 port = Integer.parseInt(portVar);
                 pam.allocate(port,0/* no pref*/);
             } catch (NumberFormatException ex) {
-                port = pam.allocate(0,prefPortMap.get(portVar));
+                int prefPort = prefPortMap.get(portVar)== null?0:prefPortMap.get(portVar);
+                port = pam.allocate(0,prefPort);
             }
             portMap.put(portVar, port);
         }
