@@ -42,12 +42,13 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
         final String[] portVars = portVariables.split(" ");
 
         final Computer cur = Executor.currentExecutor().getOwner();
-        AllocatedPortAction prevAlloc = build.getPreviousBuild().getAction(AllocatedPortAction.class);
-
         Map<String,Integer> prefPortMap = new HashMap<String,Integer>();
-        if(prevAlloc != null){
-            // try to assign ports assigned in previous build
-            prefPortMap = prevAlloc.getPreviousAllocatedPorts();
+        if (build.getPreviousBuild() != null) {
+            AllocatedPortAction prevAlloc = build.getPreviousBuild().getAction(AllocatedPortAction.class);
+            if (prevAlloc != null) {
+                // try to assign ports assigned in previous build
+                prefPortMap = prevAlloc.getPreviousAllocatedPorts();
+            }
         }
         final PortAllocationManager pam = PortAllocationManager.getManager(cur);
         final Map<String, Integer> portMap = new HashMap<String, Integer>();
