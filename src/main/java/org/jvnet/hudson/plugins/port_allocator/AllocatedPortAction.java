@@ -9,10 +9,10 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 public class AllocatedPortAction implements Action {
-    private final Map<String, Integer> portMap;
+    private final Map<String, Integer> portMap = new HashMap<String,Integer>();
 
     public AllocatedPortAction(Map<String, Integer> portMap) {
-        this.portMap = portMap;
+        this.portMap.putAll(portMap);
     }
 
     public String getIconFileName() {
