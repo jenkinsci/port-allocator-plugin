@@ -11,8 +11,7 @@ import hudson.tasks.BuildWrapper;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Allocates TCP Ports on a Computer for consumption and sets it as
@@ -39,8 +38,11 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
     }
 
     public Environment setUp(Build build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
-        final String[] portVars = portVariables.split(" ");
-
+        StringTokenizer stk = new StringTokenizer(portVariables,",");
+        final Set<String> portVars = new HashSet<String>();
+        while(stk.hasMoreTokens()) {
+            portVars.add(stk.nextToken().trim());
+        }
         final Computer cur = Executor.currentExecutor().getOwner();
         Map<String,Integer> prefPortMap = new HashMap<String,Integer>();
         if (build.getPreviousBuild() != null) {
