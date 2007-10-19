@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import net.sf.json.JSONObject;
+
 /**
  * Allocates TCP Ports on a Computer for consumption and sets it as
  * envioronet variables, see configuration
@@ -98,7 +100,6 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
     public static final class DescriptorImpl extends Descriptor<BuildWrapper> {
-
         DescriptorImpl() {
             super(PortAllocator.class);
             load();
@@ -112,7 +113,8 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
             return "/plugin/port-allocator/help.html";
         }
 
-        public PortAllocator newInstance(StaplerRequest req) throws FormException {
+        @Override
+        public BuildWrapper newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return new PortAllocator(req.getParameter("portallocator.portVariables"));
         }
     }
