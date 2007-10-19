@@ -124,7 +124,7 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
         }
 
         public String getDisplayName() {
-            return "Run Port Allocator during build";
+            return "Assign unique TCP ports to avoid collisions";
         }
 
         public String getHelpFile() {
