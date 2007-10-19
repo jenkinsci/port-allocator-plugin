@@ -101,10 +101,8 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
             }
 
             public boolean tearDown(Build build, BuildListener listener) throws IOException, InterruptedException {
-                for (Integer v : portMap.values()) {
+                for (Integer v : portMap.values())
                     pam.free(v);
-                }
-                portMap.clear();
                 return true;
             }
         };
