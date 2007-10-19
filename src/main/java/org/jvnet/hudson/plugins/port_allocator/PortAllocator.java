@@ -6,12 +6,15 @@ import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Executor;
-import hudson.model.ResourceActivity;
 import hudson.tasks.BuildWrapper;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * Allocates TCP Ports on a Computer for consumption and sets it as
