@@ -16,6 +16,7 @@ import java.util.WeakHashMap;
  * Manages ports in use.
  *
  * @author Rama Pulavarthi
+ * @author Kohsuke Kawaguchi
  */
 final class PortAllocationManager {
     private final Computer node;
@@ -55,18 +56,24 @@ final class PortAllocationManager {
     }
 
     /**
-     * Assigns the requested port if free or waits on it.
+     * Assigns the requested port.
+     *
+     * This method blocks until the port becomes available.
      */
     public synchronized int allocate(AbstractBuild owner, int port) throws InterruptedException, IOException {
-        try {
-            allocatePort(port);
-            ports.put(port,owner);
-            return port;
-        } catch (IOException ex) {
-            //TODO Requested Port is not available, wait for it
-            // change this, for now assign a  free port
-            throw ex;
+        while(true) {
+            try {
+                allocatePort(port);
+                break;
+            } catch (PortUnavailableException e) {
+                // the requested port is not available right now.
+                // the port might be blocked by a reason outside Hudson,
+                // so we need to occasionally wake up to see if the port became available
+                wait(10000);
+            }
         }
+        ports.put(port,owner);
+        return port;
     }
 
     public static PortAllocationManager getManager(Computer node) {
@@ -84,6 +91,7 @@ final class PortAllocationManager {
 
     public synchronized void free(int n) {
         ports.remove(n);
+        notifyAll(); // wake up anyone who's waiting for this port
     }
 
 
