@@ -27,17 +27,10 @@ import java.util.StringTokenizer;
  */
 public class PortAllocator extends BuildWrapper /* implements ResourceActivity */
 {
-    private final String portVariables;
+    public final String portVariables;
 
     private PortAllocator(String portVariables){
         this.portVariables = portVariables;
-    }
-
-    /**
-     * We'll use this from the <tt>config.jelly</tt>.
-     */
-    public String getPortVariables() {
-        return portVariables;
     }
 
     public Environment setUp(Build build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
