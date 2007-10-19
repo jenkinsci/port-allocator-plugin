@@ -1,6 +1,21 @@
 <div>
   <p>
-    This plugin allocates free ports and sets them as environment variables. This takes comma separated list of variables like HTTP_PORT, ADMIN_PORT, SHUTDOWN_PORT
+    When you run jobs that require TCP/IP ports (such as for testing purpose) in a machine
+    with multiple executors, multiple jobs that just so happen to run at the same time
+    may interfere with each other by using the same TCP/IP port.
+  <p>
+    You can avoid such a conflict by manually assining unique TCP/IP ports to every job on Hudson,
+    but that will quickly get very tedious.
 
-  </p>
+    This feature solves this problem by letting Hudson do the bookkeeping and allocate
+    unique port numbers.
+  <p>
+    To use this feature, put a comma-separated list of the names of environment variables
+    (such as "<tt>HTTP_PORT,ADMIN_PORT,SHUTDOWN_PORT</tt>".) Before the build starts,
+    Hudson will allocate unique ports and set them as environment variables.
+  <p>
+    This feature also allows jobs to require a certain fixed port. For example, if your job
+    is testing a mail server, where you'd require port 25 and no other ports would do,
+    then simply add <tt>25</tt> to the list, so that Hudson can make sure that no two
+    jobs that require the same port will run on the same node concurrently.
 </div>
