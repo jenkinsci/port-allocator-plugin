@@ -83,29 +83,22 @@ final class PortAllocationManager {
     }
 
     public synchronized void free(int n) {
-        //Check if port is still in use
-        try {
-            if (!isPortInUse(n)) {
-                ports.remove(n);
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        ports.remove(n);
     }
 
 
-    private boolean isPortInUse(final int port) throws InterruptedException {
-        try {
-            return node.getChannel().call(new Callable<Boolean, IOException>() {
-                public Boolean call() throws IOException {
-                    new ServerSocket(port).close();
-                    return true;
-                }
-            });
-        } catch (IOException e) {
-            return false;
-        }
-    }
+//    private boolean isPortInUse(final int port) throws InterruptedException {
+//        try {
+//            return node.getChannel().call(new Callable<Boolean, IOException>() {
+//                public Boolean call() throws IOException {
+//                    new ServerSocket(port).close();
+//                    return true;
+//                }
+//            });
+//        } catch (IOException e) {
+//            return false;
+//        }
+//    }
 
     /**
      * @param port 0 to assign a free port
