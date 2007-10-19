@@ -121,8 +121,6 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
         public PortAllocator newInstance(StaplerRequest req) throws FormException {
             return new PortAllocator(req.getParameter("portallocator.portVariables"));
         }
-
-        private static final long serialVersionUID = 1L;
     }
 
 }
