@@ -8,7 +8,6 @@ import hudson.tasks.BuildWrappers;
  * Allocates free ports to the variables.
  *
  * @author Rama Pulavarthi
- * @plugin
  */
 public class PluginImpl extends Plugin {
     public void start() throws Exception {
