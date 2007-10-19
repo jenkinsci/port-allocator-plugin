@@ -1,14 +1,14 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
+import hudson.model.AbstractBuild;
 import hudson.model.Computer;
 import hudson.remoting.Callable;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.ServerSocket;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 
@@ -22,9 +22,9 @@ final class PortAllocationManager {
 
 
     /**
-     * Ports currently in use.
+     * Ports currently in use, to the build that uses it.
      */
-    private final Set<Integer> ports = new HashSet<Integer>();
+    private final Map<Integer,AbstractBuild> ports = new HashMap<Integer,AbstractBuild>();
 
     private static final Map<Computer, WeakReference<PortAllocationManager>> INSTANCES =
             new WeakHashMap<Computer, WeakReference<PortAllocationManager>>();
@@ -41,7 +41,7 @@ final class PortAllocationManager {
      *
      * @param prefPort Preffered Port
      */
-    public synchronized int allocateRandom(int prefPort) throws InterruptedException, IOException {
+    public synchronized int allocateRandom(AbstractBuild owner, int prefPort) throws InterruptedException, IOException {
         int i;
         try {
             // try to allocate preferential port,
@@ -50,17 +50,17 @@ final class PortAllocationManager {
             // if not available, assign a random port
             i = allocatePort(0);
         }
-        ports.add(i);
+        ports.put(i,owner);
         return i;
     }
 
     /**
      * Assigns the requested port if free or waits on it.
      */
-    public synchronized int allocate(int port) throws InterruptedException, IOException {
+    public synchronized int allocate(AbstractBuild owner, int port) throws InterruptedException, IOException {
         try {
             allocatePort(port);
-            ports.add(port);
+            ports.put(port,owner);
             return port;
         } catch (IOException ex) {
             //TODO Requested Port is not available, wait for it
@@ -103,10 +103,14 @@ final class PortAllocationManager {
     /**
      * @param port 0 to assign a free port
      * @return port that gets assigned
-     * @throws InterruptedException
-     * @throws IOException
+     * @throws PortUnavailableException
+     *      If the specified port is not availabale
      */
     private int allocatePort(final int port) throws InterruptedException, IOException {
+        AbstractBuild owner = ports.get(port);
+        if(owner!=null)
+            throw new PortUnavailableException("Owned by "+owner);
+
         return node.getChannel().call(new Callable<Integer,IOException>() {
             public Integer call() throws IOException {
                 ServerSocket server;
@@ -124,6 +128,10 @@ final class PortAllocationManager {
     }
 
     static final class PortUnavailableException extends IOException {
+        PortUnavailableException(String msg) {
+            super(msg);
+        }
+
         PortUnavailableException(Throwable cause) {
             super(cause);
         }

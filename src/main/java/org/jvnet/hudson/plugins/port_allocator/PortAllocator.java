@@ -62,10 +62,10 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
             try {
                 //check if the users prefers port number
                 port = Integer.parseInt(portVar);
-                pam.allocate(port);
+                pam.allocate(build,port);
             } catch (NumberFormatException ex) {
                 int prefPort = prefPortMap.get(portVar)== null?0:prefPortMap.get(portVar);
-                port = pam.allocateRandom(prefPort);
+                port = pam.allocateRandom(build,prefPort);
             }
             portMap.put(portVar, port);
         }
