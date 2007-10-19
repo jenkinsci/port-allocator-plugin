@@ -112,12 +112,6 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
             return "/plugin/port-allocator/help.html";
         }
 
-        public boolean configure(StaplerRequest req) throws FormException {
-            req.bindParameters(this,"portallocator.");
-            save();
-            return true;
-        }
-
         public PortAllocator newInstance(StaplerRequest req) throws FormException {
             return new PortAllocator(req.getParameter("portallocator.portVariables"));
         }
