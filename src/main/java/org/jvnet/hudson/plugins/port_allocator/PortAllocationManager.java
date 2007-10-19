@@ -34,42 +34,38 @@ final class PortAllocationManager {
     }
 
     /**
-     * Allocates a port on the Computer where the jobs gets executed.
+     * Allocates a random port on the Computer where the jobs gets executed.
      *
-     * @param port
+     * <p>
+     * If the preferred port is not available, assigns a random available port.
+     *
      * @param prefPort Preffered Port
-     * @return if port =0
-     *         tries to assign the preffered port, if the preffered
-     *         port is not available assigns a random available port
-     *         else
-     *         assigns the requested port if free or waits on it
      */
-    public synchronized int allocate(int port, int prefPort) {
+    public synchronized int allocateRandom(int prefPort) throws InterruptedException, IOException {
+        int i;
         try {
-            int i;
-            if (port == 0) {
-                try {
-                    // try to allocate preferential Port,
-                    i = allocatePort(prefPort);
-                } catch (IOException ex) {
-                    // if not available assign a free port
-                    i = allocatePort(0);
-                }
-            } else {
-                try {
-                    i = allocatePort(port);
-                } catch (IOException ex) {
-                    //TODO Requested Port is not available, wait for it
-                    // change this, for now assign a  free port
-                    i = allocatePort(0);
-                }
-            }
-            ports.add(i);
-            return i;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            // try to allocate preferential port,
+            i = allocatePort(prefPort);
+        } catch (PortUnavailableException ex) {
+            // if not available, assign a random port
+            i = allocatePort(0);
+        }
+        ports.add(i);
+        return i;
+    }
+
+    /**
+     * Assigns the requested port if free or waits on it.
+     */
+    public synchronized int allocate(int port) throws InterruptedException, IOException {
+        try {
+            allocatePort(port);
+            ports.add(port);
+            return port;
+        } catch (IOException ex) {
+            //TODO Requested Port is not available, wait for it
+            // change this, for now assign a  free port
+            throw ex;
         }
     }
 
@@ -118,13 +114,27 @@ final class PortAllocationManager {
      * @throws IOException
      */
     private int allocatePort(final int port) throws InterruptedException, IOException {
-        return node.getChannel().call(new Callable<Integer, IOException>() {
+        return node.getChannel().call(new Callable<Integer,IOException>() {
             public Integer call() throws IOException {
-                ServerSocket server = new ServerSocket(port);
+                ServerSocket server;
+                try {
+                    server = new ServerSocket(port);
+                } catch (IOException e) {
+                    // fail to bind to the port
+                    throw new PortUnavailableException(e);
+                }
                 int localPort = server.getLocalPort();
                 server.close();
                 return localPort;
             }
         });
+    }
+
+    static final class PortUnavailableException extends IOException {
+        PortUnavailableException(Throwable cause) {
+            super(cause);
+        }
+
+        private static final long serialVersionUID = 1L;
     }
 }

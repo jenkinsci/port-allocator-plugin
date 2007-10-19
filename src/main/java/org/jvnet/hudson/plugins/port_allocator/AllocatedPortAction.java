@@ -1,11 +1,14 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
 import hudson.model.Action;
+import hudson.model.AbstractBuild;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Attached to {@link AbstractBuild} to record what ports are allocated.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class AllocatedPortAction implements Action {
