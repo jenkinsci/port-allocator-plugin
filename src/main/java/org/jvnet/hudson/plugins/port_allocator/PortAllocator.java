@@ -10,6 +10,7 @@ import hudson.tasks.BuildWrapper;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,25 +23,40 @@ import net.sf.json.JSONObject;
  * Allocates TCP Ports on a Computer for consumption and sets it as
  * envioronet variables, see configuration
  *
+ * <p>
  * This just mediates between different Jobs running on the same Computer
  * by assigning free ports and its the jobs responsibility to open and close the ports.   
+ *
+ * <p>
+ * TODO: implement ResourceActivity so that the queue performs intelligent job allocations
+ * based on the port availability, instead of start executing something then block.
  *
  * @author Rama Pulavarthi
  */
 public class PortAllocator extends BuildWrapper /* implements ResourceActivity */
 {
+    /**
+     * ','-separated list of tokens that designates either port variable names or port numbers.
+     */
     public final String portVariables;
 
     private PortAllocator(String portVariables){
         this.portVariables = portVariables;
     }
 
-    public Environment setUp(Build build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+    private Set<String> getVariables() {
         StringTokenizer stk = new StringTokenizer(portVariables,",");
         final Set<String> portVars = new HashSet<String>();
         while(stk.hasMoreTokens()) {
             portVars.add(stk.nextToken().trim());
         }
+        return portVars;
+    }
+
+    public Environment setUp(Build build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+        PrintStream logger = listener.getLogger();
+
+        final Set<String> portVars = getVariables();
         final Computer cur = Executor.currentExecutor().getOwner();
         Map<String,Integer> prefPortMap = new HashMap<String,Integer>();
         if (build.getPreviousBuild() != null) {
@@ -57,13 +73,17 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
             try {
                 //check if the users prefers port number
                 port = Integer.parseInt(portVar);
+                logger.println("Allocating TCP port "+port);
                 pam.allocate(build,port);
             } catch (NumberFormatException ex) {
                 int prefPort = prefPortMap.get(portVar)== null?0:prefPortMap.get(portVar);
                 port = pam.allocateRandom(build,prefPort);
+                logger.println("Allocating TCP port "+portVar+"="+port);
             }
             portMap.put(portVar, port);
         }
+        // TODO: only log messages when we are blocking.
+        logger.println("TCP port allocation complete");
         build.addAction(new AllocatedPortAction(portMap));
 
         return new Environment() {
@@ -77,9 +97,7 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
                     } catch (NumberFormatException ex) {
                         env.put(portVar, portMap.get(portVar).toString());
                     }
-
                 }
-
             }
 
             public boolean tearDown(Build build, BuildListener listener) throws IOException, InterruptedException {
