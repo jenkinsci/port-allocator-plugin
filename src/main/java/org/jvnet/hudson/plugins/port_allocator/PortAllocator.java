@@ -41,7 +41,9 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
     public final String portVariables;
 
     private PortAllocator(String portVariables){
-        this.portVariables = portVariables;
+        // to avoid platform difference issue in case sensitivity of environment variables,
+        // always use uppser case.
+        this.portVariables = portVariables.toUpperCase();
     }
 
     private Set<String> getVariables() {
