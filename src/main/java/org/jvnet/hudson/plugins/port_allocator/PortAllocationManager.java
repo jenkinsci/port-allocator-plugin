@@ -61,17 +61,39 @@ final class PortAllocationManager {
      * This method blocks until the port becomes available.
      */
     public synchronized int allocate(AbstractBuild owner, int port) throws InterruptedException, IOException {
-        while(true) {
-            try {
-                allocatePort(port);
-                break;
-            } catch (PortUnavailableException e) {
-                // the requested port is not available right now.
-                // the port might be blocked by a reason outside Hudson,
-                // so we need to occasionally wake up to see if the port became available
-                wait(10000);
-            }
-        }
+        while(ports.get(port)!=null)
+            wait();
+
+        /*
+        TODO:
+            despite the fact that the following commented out implementation is smarter,
+            I need to comment it out for the following reasons:
+
+            Often, a job that requires a particular port (let's say 8080) fails in the middle,
+            leaving behind a process that occupies the port. A typical defensive measure taken
+            to fight this is for the build to try to stop the server at the beginning.
+
+            While clunky, this technique is used frequently, and if this method blocks until
+            the port actually becomes available (not only in our book-keeping but also at OS level),
+            then such a run-away process will remain forever and thus the next build will
+            never happen.
+
+            This unfortunately doesn't protect us from a case where job X runs and dies, leaving
+            a server behind, then job Y comes in, looking for the same port, and fails.
+
+            We need to revisit this.
+         */
+//        while(true) {
+//            try {
+//                allocatePort(port);
+//                break;
+//            } catch (PortUnavailableException e) {
+//                // the requested port is not available right now.
+//                // the port might be blocked by a reason outside Hudson,
+//                // so we need to occasionally wake up to see if the port became available
+//                wait(10000);
+//            }
+//        }
         ports.put(port,owner);
         return port;
     }
