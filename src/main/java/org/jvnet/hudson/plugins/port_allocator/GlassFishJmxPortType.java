@@ -24,11 +24,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * GlassFish JMX port so that runaway GF instance can be terminated.
+ * 
  * @author Kohsuke Kawaguchi
  */
 public class GlassFishJmxPortType extends PortType {
-    private final String userName;
-    private final String password;
+    /**
+     * GlassFish admin user name.
+     */
+    public final String userName;
+    /**
+     * GlassFish admin password.
+     */
+    public final String password;
 
     @DataBoundConstructor
     public GlassFishJmxPortType(String name, String userName, String password) {
