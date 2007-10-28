@@ -64,7 +64,7 @@ public class GlassFishJmxPortType extends PortType {
                         Map<String,Object> envs = new HashMap<String,Object>();
                         envs.put(JMXConnector.CREDENTIALS,new String[]{userName, password});
 
-                        MBeanServerConnection con = null;
+                        MBeanServerConnection con;
                         try {
                             con = JMXConnectorFactory.connect(url,envs).getMBeanServerConnection();
                         } catch (IOException e) {
@@ -80,6 +80,7 @@ public class GlassFishJmxPortType extends PortType {
                         } catch (UnmarshalException e) {
                             if(e.getCause() instanceof EOFException) {
                                 // to be expected, as the above would shut down the server.
+                                buildListener.getLogger().println("GlassFish was shut down");
                             } else {
                                 throw e;
                             }
