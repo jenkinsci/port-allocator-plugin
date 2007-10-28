@@ -1,7 +1,7 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
-import hudson.model.Action;
 import hudson.model.AbstractBuild;
+import hudson.model.Action;
 
 import java.util.HashMap;
 import java.util.Map;

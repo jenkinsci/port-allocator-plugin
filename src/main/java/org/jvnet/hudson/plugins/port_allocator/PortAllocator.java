@@ -7,17 +7,16 @@ import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Executor;
 import hudson.tasks.BuildWrapper;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-
-import net.sf.json.JSONObject;
 
 /**
  * Allocates TCP Ports on a Computer for consumption and sets it as
@@ -35,30 +34,15 @@ import net.sf.json.JSONObject;
  */
 public class PortAllocator extends BuildWrapper /* implements ResourceActivity */
 {
-    /**
-     * ','-separated list of tokens that designates either port variable names or port numbers.
-     */
-    public final String portVariables;
+    public final PortType[] ports;
 
-    private PortAllocator(String portVariables){
-        // to avoid platform difference issue in case sensitivity of environment variables,
-        // always use uppser case.
-        this.portVariables = portVariables.toUpperCase();
-    }
-
-    private Set<String> getVariables() {
-        StringTokenizer stk = new StringTokenizer(portVariables,",");
-        final Set<String> portVars = new HashSet<String>();
-        while(stk.hasMoreTokens()) {
-            portVars.add(stk.nextToken().trim());
-        }
-        return portVars;
+    private PortAllocator(PortType[] ports){
+        this.ports = ports;
     }
 
     public Environment setUp(Build build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
 
-        final Set<String> portVars = getVariables();
         final Computer cur = Executor.currentExecutor().getOwner();
         Map<String,Integer> prefPortMap = new HashMap<String,Integer>();
         if (build.getPreviousBuild() != null) {
@@ -69,21 +53,17 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
             }
         }
         final PortAllocationManager pam = PortAllocationManager.getManager(cur);
-        final Map<String, Integer> portMap = new HashMap<String, Integer>();
-        for (String portVar : portVars) {
-            Integer port;
-            try {
-                //check if the users prefers port number
-                port = Integer.parseInt(portVar);
-                logger.println("Allocating TCP port "+port);
-                pam.allocate(build,port);
-            } catch (NumberFormatException ex) {
-                int prefPort = prefPortMap.get(portVar)== null?0:prefPortMap.get(portVar);
-                port = pam.allocateRandom(build,prefPort);
-                logger.println("Allocating TCP port "+portVar+"="+port);
-            }
-            portMap.put(portVar, port);
+        Map<String,Integer> portMap = new HashMap<String,Integer>();
+        final List<Port> allocated = new ArrayList<Port>();
+
+        for (PortType pt : ports) {
+            logger.println("Allocating TCP port "+pt.name);
+            int prefPort = prefPortMap.get(pt.name)== null?0:prefPortMap.get(pt.name);
+            Port p = pt.allocate(build, pam, prefPort);
+            allocated.add(p);
+            portMap.put(pt.name,p.get());
         }
+
         // TODO: only log messages when we are blocking.
         logger.println("TCP port allocation complete");
         build.addAction(new AllocatedPortAction(portMap));
@@ -92,19 +72,13 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
 
             @Override
             public void buildEnvVars(Map<String, String> env) {
-                for (String portVar : portMap.keySet()) {
-                    try {
-                        //check if port variable is a port number, if so don't set env 
-                        Integer.parseInt(portVar);
-                    } catch (NumberFormatException ex) {
-                        env.put(portVar, portMap.get(portVar).toString());
-                    }
-                }
+                for (Port p : allocated)
+                    env.put(p.type.name, String.valueOf(p.get()));
             }
 
             public boolean tearDown(Build build, BuildListener listener) throws IOException, InterruptedException {
-                for (Integer v : portMap.values())
-                    pam.free(v);
+                for (Port p : allocated)
+                    p.cleanUp();
                 return true;
             }
         };
@@ -131,9 +105,21 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
             return "/plugin/port-allocator/help.html";
         }
 
+        public List<PortTypeDescriptor> getPortTypes() {
+            return PortTypeDescriptor.LIST; 
+        }
+
         @Override
         public BuildWrapper newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return new PortAllocator(req.getParameter("portallocator.portVariables"));
+            JSONArray a = JSONArray.fromObject(formData.get("ports"));
+
+            List<PortType> ports = new ArrayList<PortType>();
+            for (Object o : a) {
+                JSONObject jo = (JSONObject)o;
+                String kind = jo.getString("kind");
+                ports.add(PortTypeDescriptor.find(kind).newInstance(req,jo));
+            }
+            return new PortAllocator(ports.toArray(new PortType[ports.size()]));
         }
     }
 

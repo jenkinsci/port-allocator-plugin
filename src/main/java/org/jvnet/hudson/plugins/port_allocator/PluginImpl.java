@@ -12,5 +12,7 @@ import hudson.tasks.BuildWrappers;
 public class PluginImpl extends Plugin {
     public void start() throws Exception {
         BuildWrappers.WRAPPERS.add(PortAllocator.DESCRIPTOR);
+        PortTypeDescriptor.LIST.add(DefaultPortType.DescriptorImpl.INSTANCE);
+        PortTypeDescriptor.LIST.add(GlassFishJmxPortType.DescriptorImpl.INSTANCE);
     }
 }
