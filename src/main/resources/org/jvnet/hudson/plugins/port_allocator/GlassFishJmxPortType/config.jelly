@@ -2,7 +2,7 @@
   <f:entry title="Name" help="/plugin/port-allocator/help-name.html">
     <f:textbox name="portType.name" value="${h.defaulted(instance.name,'JMX_PORT')}" />
   </f:entry>
-  <f:entry title="Admin username">
+  <f:entry title="Admin username" help="/plugin/port-allocator/help-gf-username.html">
     <f:textbox name="portType.username" value="${h.defaulted(instance.username,'admin')}" />
   </f:entry>
   <f:entry title="Admin password">
