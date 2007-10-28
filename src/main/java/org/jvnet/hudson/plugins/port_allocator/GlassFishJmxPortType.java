@@ -52,7 +52,7 @@ public class GlassFishJmxPortType extends PortType {
                     public Void call() throws IOException {
                         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:"+n+"/jmxrmi");
 
-                        Map envs = new HashMap();
+                        Map<String,Object> envs = new HashMap<String,Object>();
                         envs.put(JMXConnector.CREDENTIALS,new String[]{userName, password});
 
                         MBeanServerConnection con = JMXConnectorFactory.connect(url,envs).getMBeanServerConnection();
