@@ -8,21 +8,21 @@ import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
 import javax.management.InstanceNotFoundException;
-import javax.management.ReflectionException;
 import javax.management.MBeanException;
+import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import java.io.EOFException;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketException;
 import java.rmi.UnmarshalException;
 import java.util.HashMap;
 import java.util.Map;
-import java.net.ConnectException;
 
 /**
  * GlassFish JMX port so that runaway GF instance can be terminated.
@@ -83,7 +83,7 @@ public class GlassFishJmxPortType extends PortType {
                         try {
                             con.invoke(new ObjectName("amx:j2eeType=J2EEServer,name=server"),"stop",new Object[0],new String[0]);
                         } catch (UnmarshalException e) {
-                            if(e.getCause() instanceof EOFException) {
+                            if(e.getCause() instanceof SocketException || e.getCause() instanceof IOException) {
                                 // to be expected, as the above would shut down the server.
                                 buildListener.getLogger().println("GlassFish was shut down");
                             } else {
