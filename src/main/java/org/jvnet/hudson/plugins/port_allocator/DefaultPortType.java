@@ -23,7 +23,12 @@ public class DefaultPortType extends PortType {
 
     @Override
     public Port allocate(AbstractBuild<?, ?> build, final PortAllocationManager manager, int prefPort, Launcher launcher, BuildListener buildListener) throws IOException, InterruptedException {
-        final int n = manager.allocateRandom(build, prefPort);
+        final int n;
+        if(isFixedPort())
+            n = manager.allocate(build, getFixedPort());
+        else
+            n = manager.allocateRandom(build, prefPort);
+        
         return new Port(this) {
             public int get() {
                 return n;

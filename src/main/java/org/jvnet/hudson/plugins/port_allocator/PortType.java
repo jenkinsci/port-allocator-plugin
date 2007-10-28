@@ -16,7 +16,8 @@ import java.io.IOException;
 public abstract class PortType implements ExtensionPoint, Describable<PortType> {
     /**
      * Name that identifies {@link PortType} among other {@link PortType}s in the
-     * same {@link PortAllocator}.
+     * same {@link PortAllocator}, or the numeric port number value if that port
+     * number is fixed.
      */
     public final String name;
 
@@ -27,12 +28,31 @@ public abstract class PortType implements ExtensionPoint, Describable<PortType> 
     }
 
     /**
+     * If this port type has a fixed port number, return that value.
+     * Otherwise 0.
+     */
+    public final int getFixedPort() {
+        try {
+            return Integer.parseInt(name);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Returns true if this port type has a fixed port number.
+     */
+    public final boolean isFixedPort() {
+        return getFixedPort()!=0;
+    }
+
+    /**
      * Allocates a new port for a given build.
      *
      * @param manager
      *      This can be used to assign a new TCP port number.
      * @param prefPort
- *      The port number allocated to this type the last time.
+     *  The port number allocated to this type the last time.
      * @param launcher
      * @param buildListener
      */
