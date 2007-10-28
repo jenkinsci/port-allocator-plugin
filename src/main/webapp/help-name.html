@@ -1,0 +1,12 @@
+<div>
+    Either specify a variable name that represents this port, or specify a numeric port number.
+  <p>
+    If you specify a name, Hudson will assign a unique port number as an environment variable.
+    This is preferable as it lets Hudson manage TCP port allocations. To avoid platform specific
+    issues, all upper case names are recommended.
+  <p>
+    If you specify a numeric value, Hudson will make sure that port number is reserved while
+    a build is in progress. As a result of this, builds may block while another build that uses
+    the same port number is in progress. This is useful when your build hard-codes a port number
+    and you cannot change that.
+</div>
