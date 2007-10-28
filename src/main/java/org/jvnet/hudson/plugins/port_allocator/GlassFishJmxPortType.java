@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.rmi.UnmarshalException;
 import java.util.HashMap;
 import java.util.Map;
+import java.net.ConnectException;
 
 /**
  * GlassFish JMX port so that runaway GF instance can be terminated.
@@ -63,7 +64,17 @@ public class GlassFishJmxPortType extends PortType {
                         Map<String,Object> envs = new HashMap<String,Object>();
                         envs.put(JMXConnector.CREDENTIALS,new String[]{userName, password});
 
-                        MBeanServerConnection con = JMXConnectorFactory.connect(url,envs).getMBeanServerConnection();
+                        MBeanServerConnection con = null;
+                        try {
+                            con = JMXConnectorFactory.connect(url,envs).getMBeanServerConnection();
+                        } catch (IOException e) {
+                            for(Throwable t=e; t!=null; t=t.getCause())
+                                if(t instanceof ConnectException) {
+                                    // server not connectable. must have been shut down already
+                                    return null;
+                                }
+                            throw e; // other failure
+                        }
                         try {
                             con.invoke(new ObjectName("amx:j2eeType=J2EEServer,name=server"),"stop",new Object[0],new String[0]);
                         } catch (UnmarshalException e) {
