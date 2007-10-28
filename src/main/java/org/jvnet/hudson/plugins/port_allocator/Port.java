@@ -1,5 +1,7 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
+import java.io.IOException;
+
 /**
  * @author Kohsuke Kawaguchi
  */
@@ -21,5 +23,5 @@ public abstract class Port {
     /**
      * Frees the port.
      */
-    public abstract void cleanUp();
+    public abstract void cleanUp() throws IOException, InterruptedException;
 }

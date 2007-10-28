@@ -1,8 +1,10 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
 import hudson.ExtensionPoint;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.Describable;
+import hudson.model.BuildListener;
 
 import java.io.IOException;
 
@@ -30,10 +32,11 @@ public abstract class PortType implements ExtensionPoint, Describable<PortType> 
      * @param manager
      *      This can be used to assign a new TCP port number.
      * @param prefPort
-     *      The port number allocated to this type the last time.
-     *      Implementation is encouraged to use the same port number again.
+ *      The port number allocated to this type the last time.
+     * @param launcher
+     * @param buildListener
      */
-    public abstract Port allocate(AbstractBuild<?,?> build, PortAllocationManager manager, int prefPort) throws IOException, InterruptedException;
+    public abstract Port allocate(AbstractBuild<?, ?> build, PortAllocationManager manager, int prefPort, Launcher launcher, BuildListener buildListener) throws IOException, InterruptedException;
 
     public abstract PortTypeDescriptor getDescriptor();
 }

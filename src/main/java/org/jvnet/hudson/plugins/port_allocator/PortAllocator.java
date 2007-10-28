@@ -59,7 +59,7 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
         for (PortType pt : ports) {
             logger.println("Allocating TCP port "+pt.name);
             int prefPort = prefPortMap.get(pt.name)== null?0:prefPortMap.get(pt.name);
-            Port p = pt.allocate(build, pam, prefPort);
+            Port p = pt.allocate(build, pam, prefPort, launcher, listener);
             allocated.add(p);
             portMap.put(pt.name,p.get());
         }
