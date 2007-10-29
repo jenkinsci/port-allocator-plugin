@@ -7,7 +7,6 @@ import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Executor;
 import hudson.tasks.BuildWrapper;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -111,14 +110,8 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
 
         @Override
         public BuildWrapper newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            JSONArray a = JSONArray.fromObject(formData.get("ports"));
-
-            List<PortType> ports = new ArrayList<PortType>();
-            for (Object o : a) {
-                JSONObject jo = (JSONObject)o;
-                String kind = jo.getString("kind");
-                ports.add(PortTypeDescriptor.find(kind).newInstance(req,jo));
-            }
+            List<PortType> ports = Descriptor.newInstancesFromHeteroList(
+                    req, formData, "ports", PortTypeDescriptor.LIST);
             return new PortAllocator(ports.toArray(new PortType[ports.size()]));
         }
     }

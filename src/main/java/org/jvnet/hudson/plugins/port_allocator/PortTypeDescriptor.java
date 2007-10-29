@@ -28,12 +28,4 @@ public abstract class PortTypeDescriptor extends Descriptor<PortType> {
      * All registered {@link PortTypeDescriptor}s.
      */
     public static final List<PortTypeDescriptor> LIST = new ArrayList<PortTypeDescriptor>();
-
-    public static PortTypeDescriptor find(String displayName) {
-        for (PortTypeDescriptor d : LIST) {
-            if(d.getDisplayName().equals(displayName))
-                return d;
-        }
-        return null;
-    }
 }
