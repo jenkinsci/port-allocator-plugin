@@ -141,20 +141,7 @@ final class PortAllocationManager {
         if(owner!=null)
             throw new PortUnavailableException("Owned by "+owner);
 
-        return node.getChannel().call(new Callable<Integer,IOException>() {
-            public Integer call() throws IOException {
-                ServerSocket server;
-                try {
-                    server = new ServerSocket(port);
-                } catch (IOException e) {
-                    // fail to bind to the port
-                    throw new PortUnavailableException(e);
-                }
-                int localPort = server.getLocalPort();
-                server.close();
-                return localPort;
-            }
-        });
+        return node.getChannel().call(new AllocateTask(port));
     }
 
     static final class PortUnavailableException extends IOException {
@@ -164,6 +151,29 @@ final class PortAllocationManager {
 
         PortUnavailableException(Throwable cause) {
             super(cause);
+        }
+
+        private static final long serialVersionUID = 1L;
+    }
+
+    private static final class AllocateTask implements Callable<Integer,IOException> {
+        private final int port;
+
+        public AllocateTask(int port) {
+            this.port = port;
+        }
+
+        public Integer call() throws IOException {
+            ServerSocket server;
+            try {
+                server = new ServerSocket(port);
+            } catch (IOException e) {
+                // fail to bind to the port
+                throw new PortUnavailableException(e);
+            }
+            int localPort = server.getLocalPort();
+            server.close();
+            return localPort;
         }
 
         private static final long serialVersionUID = 1L;
