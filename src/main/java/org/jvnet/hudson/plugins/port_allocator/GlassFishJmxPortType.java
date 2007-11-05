@@ -113,7 +113,6 @@ public class GlassFishJmxPortType extends PortType implements Serializable {
 
             public void cleanUp() throws IOException, InterruptedException {
                 manager.free(n);
-
                 launcher.getChannel().call(new GlassFishCleanUpTask(buildListener));
             }
         };
