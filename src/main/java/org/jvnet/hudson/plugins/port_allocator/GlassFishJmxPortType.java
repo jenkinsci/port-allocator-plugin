@@ -18,6 +18,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.rmi.UnmarshalException;
@@ -29,7 +30,7 @@ import java.util.Map;
  * 
  * @author Kohsuke Kawaguchi
  */
-public class GlassFishJmxPortType extends PortType {
+public class GlassFishJmxPortType extends PortType implements Serializable {
     /**
      * GlassFish admin user name.
      */
@@ -54,6 +55,57 @@ public class GlassFishJmxPortType extends PortType {
         else
             n = manager.allocateRandom(build, prefPort);
 
+        /**
+         * Cleans up GlassFish instance.
+         */
+        final class GlassFishCleanUpTask implements Callable<Void,IOException>, Serializable {
+            private final BuildListener buildListener;
+
+            public GlassFishCleanUpTask(BuildListener buildListener) {
+                this.buildListener = buildListener;
+            }
+
+            public Void call() throws IOException {
+                JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:"+ n +"/jmxrmi");
+
+                Map<String,Object> envs = new HashMap<String,Object>();
+                envs.put(JMXConnector.CREDENTIALS,new String[]{userName, password});
+
+                MBeanServerConnection con;
+                try {
+                    con = JMXConnectorFactory.connect(url,envs).getMBeanServerConnection();
+                } catch (IOException e) {
+                    for(Throwable t=e; t!=null; t=t.getCause())
+                        if(t instanceof ConnectException) {
+                            // server not connectable. must have been shut down already
+                            return null;
+                        }
+                    throw e; // other failure
+                }
+                try {
+                    con.invoke(new ObjectName("amx:j2eeType=J2EEServer,name=server"),"stop",new Object[0],new String[0]);
+                } catch (UnmarshalException e) {
+                    if(e.getCause() instanceof SocketException || e.getCause() instanceof IOException) {
+                        // to be expected, as the above would shut down the server.
+                        buildListener.getLogger().println("GlassFish was shut down");
+                    } else {
+                        throw e;
+                    }
+                } catch (MalformedObjectNameException e) {
+                    throw new AssertionError(e); // impossible
+                } catch (InstanceNotFoundException e) {
+                    e.printStackTrace(buildListener.error("Unable to find J2EEServer mbean"));
+                } catch (ReflectionException e) {
+                    e.printStackTrace(buildListener.error("Unable to access J2EEServer mbean"));
+                } catch (MBeanException e) {
+                    e.printStackTrace(buildListener.error("Unable to call J2EEServer mbean"));
+                }
+                return null;
+            }
+
+            private static final long serialVersionUID = 1L;
+        }
+
         return new Port(this) {
             public int get() {
                 return n;
@@ -62,45 +114,7 @@ public class GlassFishJmxPortType extends PortType {
             public void cleanUp() throws IOException, InterruptedException {
                 manager.free(n);
 
-                launcher.getChannel().call(new Callable<Void,IOException>() {
-                    public Void call() throws IOException {
-                        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:"+n+"/jmxrmi");
-
-                        Map<String,Object> envs = new HashMap<String,Object>();
-                        envs.put(JMXConnector.CREDENTIALS,new String[]{userName, password});
-
-                        MBeanServerConnection con;
-                        try {
-                            con = JMXConnectorFactory.connect(url,envs).getMBeanServerConnection();
-                        } catch (IOException e) {
-                            for(Throwable t=e; t!=null; t=t.getCause())
-                                if(t instanceof ConnectException) {
-                                    // server not connectable. must have been shut down already
-                                    return null;
-                                }
-                            throw e; // other failure
-                        }
-                        try {
-                            con.invoke(new ObjectName("amx:j2eeType=J2EEServer,name=server"),"stop",new Object[0],new String[0]);
-                        } catch (UnmarshalException e) {
-                            if(e.getCause() instanceof SocketException || e.getCause() instanceof IOException) {
-                                // to be expected, as the above would shut down the server.
-                                buildListener.getLogger().println("GlassFish was shut down");
-                            } else {
-                                throw e;
-                            }
-                        } catch (MalformedObjectNameException e) {
-                            throw new AssertionError(e); // impossible
-                        } catch (InstanceNotFoundException e) {
-                            e.printStackTrace(buildListener.error("Unable to find J2EEServer mbean"));
-                        } catch (ReflectionException e) {
-                            e.printStackTrace(buildListener.error("Unable to access J2EEServer mbean"));
-                        } catch (MBeanException e) {
-                            e.printStackTrace(buildListener.error("Unable to call J2EEServer mbean"));
-                        }
-                        return null;
-                    }
-                });
+                launcher.getChannel().call(new GlassFishCleanUpTask(buildListener));
             }
         };
     }
@@ -128,5 +142,7 @@ public class GlassFishJmxPortType extends PortType {
 
         public static final DescriptorImpl INSTANCE = new DescriptorImpl();
     }
+
+    private static final long serialVersionUID = 1L;
 }
 
