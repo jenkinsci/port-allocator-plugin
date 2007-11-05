@@ -30,7 +30,7 @@ import java.util.Map;
  * 
  * @author Kohsuke Kawaguchi
  */
-public class GlassFishJmxPortType extends PortType implements Serializable {
+public class GlassFishJmxPortType extends PortType {
     /**
      * GlassFish admin user name.
      */
