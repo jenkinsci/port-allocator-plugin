@@ -14,5 +14,6 @@ public class PluginImpl extends Plugin {
         BuildWrappers.WRAPPERS.add(PortAllocator.DESCRIPTOR);
         PortTypeDescriptor.LIST.add(DefaultPortType.DescriptorImpl.INSTANCE);
         PortTypeDescriptor.LIST.add(GlassFishJmxPortType.DescriptorImpl.INSTANCE);
+        PortTypeDescriptor.LIST.add(TomcatShutdownPortType.DescriptorImpl.INSTANCE);
     }
 }
