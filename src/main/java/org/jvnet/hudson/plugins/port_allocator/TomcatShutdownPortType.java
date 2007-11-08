@@ -56,6 +56,7 @@ public class TomcatShutdownPortType  extends PortType {
                 try {
                     s.getOutputStream().write(password.getBytes());
                     s.close();
+                    buildListener.getLogger().println("Shutdown left-over Tomcat");
                 } catch (IOException x) {
                     x.printStackTrace(buildListener.error("Failed to write to Tomcat shutdown port"));
                 }
