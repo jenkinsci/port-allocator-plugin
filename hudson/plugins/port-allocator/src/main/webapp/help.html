@@ -1,0 +1,25 @@
+<div>
+  <p>
+    When you run jobs that require TCP/IP ports (such as for testing purpose) in a machine
+    with multiple executors, multiple jobs that just so happen to run at the same time
+    may interfere with each other by using the same TCP/IP port.
+  <p>
+    You can avoid such a conflict by manually assining unique TCP/IP ports to every job on Hudson,
+    but that will quickly get very tedious.
+
+    This feature solves this problem by letting Hudson do the bookkeeping and allocate
+    unique port numbers.
+  <p>
+    To use this feature, list up such TCP ports by giving them names. Before the build starts,
+    Hudson will allocate unique ports and pass them as environment variables to the build.
+    For example, if you add <tt>ABC_PORT</tt> and <tt>DEF_PORT</tt>, you can access them like
+    <tt>echo $ABC_PORT</tt> from your build.
+  <p>
+    By choosing the right TCP port type, you can make Hudson do the clean up processing.
+    This is particularly useful for taking care of run-away daemon processes.
+  <p>
+    This feature also allows jobs to require a certain fixed port. For example, if your job
+    is testing a mail server, where you'd require port 25 and no other ports would do,
+    then simply add <tt>25</tt> as the name, so that Hudson can make sure that no two
+    jobs that require the same port will run on the same node concurrently.
+</div>

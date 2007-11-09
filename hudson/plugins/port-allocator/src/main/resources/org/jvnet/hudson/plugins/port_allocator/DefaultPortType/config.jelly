@@ -1,0 +1,5 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:entry title="Name" help="/plugin/port-allocator/help-name.html">
+    <f:textbox name="portType.name" value="${instance.name}" />
+  </f:entry>
+</j:jelly>

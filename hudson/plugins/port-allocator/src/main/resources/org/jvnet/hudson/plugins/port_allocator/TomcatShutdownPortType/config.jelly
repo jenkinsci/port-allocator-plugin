@@ -1,0 +1,8 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:entry title="Name" help="/plugin/port-allocator/help-name.html">
+    <f:textbox name="portType.name" value="${h.defaulted(instance.name,'SHUTDOWN_PORT')}" />
+  </f:entry>
+  <f:entry title="Password" help="/plugin/port-allocator/help-tomcat-password.html">
+    <f:textbox name="portType.password" value="${h.defaulted(instance.password,'SHUTDOWN')}" />
+  </f:entry>
+</j:jelly>
