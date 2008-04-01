@@ -1,0 +1,11 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:entry title="Name" help="/plugin/port-allocator/help-name.html">
+    <f:textbox name="portType.name" value="${h.defaulted(instance.name,'JMX_PORT')}" />
+  </f:entry>
+  <f:entry title="Admin username" help="/plugin/port-allocator/help-gf-username.html">
+    <f:textbox name="portType.username" value="${h.defaulted(instance.username,'admin')}" />
+  </f:entry>
+  <f:entry title="Admin password">
+    <f:textbox name="portType.password" value="${h.defaulted(instance.password,'adminadmin')}" />
+  </f:entry>
+</j:jelly>
