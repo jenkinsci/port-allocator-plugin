@@ -6,6 +6,7 @@ import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Executor;
+import hudson.model.AbstractBuild;
 import hudson.tasks.BuildWrapper;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
@@ -39,7 +40,7 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
         this.ports = ports;
     }
 
-    public Environment setUp(Build build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+    public Environment setUp(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
 
         final Computer cur = Executor.currentExecutor().getOwner();
