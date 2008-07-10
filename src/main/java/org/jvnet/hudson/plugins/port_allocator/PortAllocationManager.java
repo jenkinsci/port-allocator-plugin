@@ -149,9 +149,10 @@ final class PortAllocationManager {
             super(msg);
         }
 
-        PortUnavailableException(Throwable cause) {
-            super(cause);
-        }
+        // not compatible with JDK1.5
+//        PortUnavailableException(Throwable cause) {
+//            super(cause);
+//        }
 
         private static final long serialVersionUID = 1L;
     }
@@ -169,7 +170,9 @@ final class PortAllocationManager {
                 server = new ServerSocket(port);
             } catch (IOException e) {
                 // fail to bind to the port
-                throw new PortUnavailableException(e);
+                PortUnavailableException t = new PortUnavailableException(e.getLocalizedMessage());
+                t.initCause(e);
+                throw t;
             }
             int localPort = server.getLocalPort();
             server.close();
