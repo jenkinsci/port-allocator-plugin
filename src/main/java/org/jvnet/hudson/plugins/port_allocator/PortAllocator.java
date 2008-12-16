@@ -62,6 +62,7 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
             Port p = pt.allocate(build, pam, prefPort, launcher, listener);
             allocated.add(p);
             portMap.put(pt.name,p.get());
+            logger.println("  -> Assigned "+p.get());
         }
 
         // TODO: only log messages when we are blocking.
