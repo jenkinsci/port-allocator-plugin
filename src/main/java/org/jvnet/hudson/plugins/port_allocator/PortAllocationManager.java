@@ -40,7 +40,9 @@ final class PortAllocationManager {
      * <p>
      * If the preferred port is not available, assigns a random available port.
      *
-     * @param prefPort Preffered Port
+     * @param prefPort
+     *      Preffered port. This method trys to assign this port, and upon failing, fall back to
+     *      assigning a random port.
      */
     public synchronized int allocateRandom(AbstractBuild owner, int prefPort) throws InterruptedException, IOException {
         int i;

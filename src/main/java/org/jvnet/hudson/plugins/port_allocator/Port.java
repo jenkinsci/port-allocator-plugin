@@ -3,6 +3,8 @@ package org.jvnet.hudson.plugins.port_allocator;
 import java.io.IOException;
 
 /**
+ * Represents an assigned TCP port and encapsulates how it should be cleaned up.
+ * 
  * @author Kohsuke Kawaguchi
  */
 public abstract class Port {
