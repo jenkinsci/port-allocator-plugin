@@ -11,5 +11,5 @@
   <packaging>hpi</packaging>
   <version>1.4-SNAPSHOT</version>
   <name>Hudson Port Allocator Plug-in</name>
-  <url>http://hudson.gotdns.com/wiki/display/HUDSON/Port+Allocator+Plugin</url>
+  <url>http://wiki.hudson-ci.org/display/HUDSON/Port+Allocator+Plugin</url>
 </project>
