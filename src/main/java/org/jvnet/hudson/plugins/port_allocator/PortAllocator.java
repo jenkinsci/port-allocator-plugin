@@ -1,7 +1,7 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
+import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
@@ -40,6 +40,7 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
         this.ports = ports;
     }
 
+    @Override
     public Environment setUp(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
 
@@ -77,7 +78,8 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
                     env.put(p.type.name, String.valueOf(p.get()));
             }
 
-            public boolean tearDown(Build build, BuildListener listener) throws IOException, InterruptedException {
+            @Override
+            public boolean tearDown(AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
                 for (Port p : allocated)
                     p.cleanUp();
                 return true;
@@ -85,11 +87,12 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
         };
     }
 
+    @Override
     public Descriptor<BuildWrapper> getDescriptor() {
         return DESCRIPTOR;
     }
 
-
+    @Extension
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
     public static final class DescriptorImpl extends Descriptor<BuildWrapper> {
@@ -102,6 +105,7 @@ public class PortAllocator extends BuildWrapper /* implements ResourceActivity *
             return "Assign unique TCP ports to avoid collisions";
         }
 
+        @Override
         public String getHelpFile() {
             return "/plugin/port-allocator/help.html";
         }

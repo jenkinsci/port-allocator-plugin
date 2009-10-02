@@ -1,7 +1,6 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
 import hudson.Plugin;
-import hudson.tasks.BuildWrappers;
 
 /**
  * PortAllocator Plugin
@@ -10,8 +9,8 @@ import hudson.tasks.BuildWrappers;
  * @author Rama Pulavarthi
  */
 public class PluginImpl extends Plugin {
+    @Override
     public void start() throws Exception {
-        BuildWrappers.WRAPPERS.add(PortAllocator.DESCRIPTOR);
         PortTypeDescriptor.LIST.add(DefaultPortType.DescriptorImpl.INSTANCE);
         PortTypeDescriptor.LIST.add(GlassFishJmxPortType.DescriptorImpl.INSTANCE);
         PortTypeDescriptor.LIST.add(TomcatShutdownPortType.DescriptorImpl.INSTANCE);
