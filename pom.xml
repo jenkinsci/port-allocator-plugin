@@ -12,4 +12,15 @@
   <version>1.4-SNAPSHOT</version>
   <name>Hudson Port Allocator Plug-in</name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Port+Allocator+Plugin</url>
+
+  <developers>
+    <developer>
+      <id>ramapulavarthi</id>
+      <name>Rama Pulavarthi</name>
+    </developer>
+    <developer>
+      <id>kohsuke</id>
+      <name>Kohsuke Kawaguchi</name>
+    </developer>
+  </developers>
 </project>
