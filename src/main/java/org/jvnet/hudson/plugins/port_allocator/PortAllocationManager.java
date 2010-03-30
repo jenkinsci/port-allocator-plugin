@@ -18,7 +18,7 @@ import java.util.WeakHashMap;
  * @author Rama Pulavarthi
  * @author Kohsuke Kawaguchi
  */
-final class PortAllocationManager {
+public final class PortAllocationManager {
     private final Computer node;
 
 
