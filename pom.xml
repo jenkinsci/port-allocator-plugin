@@ -25,7 +25,12 @@
       <id>oldelvet</id>
       <name>Richard Mortimer</name>
     </developer>
+    <developer>
+      <id>pepov</id>
+      <name>Peter Wilcsinszky</name>
+    </developer>
   </developers>
+
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/port-allocator-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/port-allocator-plugin.git</developerConnection>
@@ -45,6 +50,4 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
-</project>  
-  
-
+</project>

@@ -17,14 +17,6 @@ public abstract class PortTypeDescriptor extends Descriptor<PortType> {
     }
 
     /**
-     * Unused.
-     */
-    @Override
-    public final PortType newInstance(StaplerRequest req) throws FormException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * All registered {@link PortTypeDescriptor}s.
      */
     public static final List<PortTypeDescriptor> LIST = new ArrayList<PortTypeDescriptor>();
