@@ -3,15 +3,14 @@
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.324</version>
-    <relativePath>../pom.xml</relativePath>
+    <version>1.392</version>
   </parent>
 
   <artifactId>port-allocator</artifactId>
   <packaging>hpi</packaging>
   <version>1.6-SNAPSHOT</version>
-  <name>Hudson Port Allocator Plug-in</name>
-  <url>http://wiki.hudson-ci.org/display/HUDSON/Port+Allocator+Plugin</url>
+  <name>Jenkins Port Allocator Plug-in</name>
+  <url>http://wiki.jenkins-ci.org/display/JENKINS/Port+Allocator+Plugin</url>
 
   <developers>
     <developer>
@@ -22,5 +21,14 @@
       <id>kohsuke</id>
       <name>Kohsuke Kawaguchi</name>
     </developer>
+    <developer>
+      <id>oldelvet</id>
+      <name>Richard Mortimer</name>
+    </developer>
   </developers>
+  <scm>
+    <connection>scm:git:git://github.com/jenkinsci/port-allocator-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/port-allocator-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/port-allocator-plugin</url>
+  </scm>
 </project>
