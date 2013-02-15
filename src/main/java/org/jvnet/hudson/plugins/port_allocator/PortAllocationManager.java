@@ -9,6 +9,7 @@ import java.lang.ref.WeakReference;
 import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.WeakHashMap;
 
 
@@ -21,6 +22,8 @@ import java.util.WeakHashMap;
 public final class PortAllocationManager {
     private final Computer node;
 
+    /** Maximum number of tries to allocate a specific port range. */
+    private static final int MAX_TRIES = 100;
 
     /**
      * Ports currently in use, to the build that uses it.
@@ -55,6 +58,67 @@ public final class PortAllocationManager {
         }
         ports.put(i,owner);
         return i;
+    }
+
+    /**
+     * Allocate a continuous range of ports within specified limits.
+     * The caller is responsible for freeing the individual ports within
+     * the allocated range.
+     * @param portAllocator
+     * @param build the current build
+     * @param start the first in the range of allowable ports
+     * @param end the last entry in the range of allowable ports
+     * @param count the number of ports to allocate
+     * @param isConsecutive true if the allocated ports should be consecutive
+     * @return the ports allocated
+     * @throws InterruptedException if the allocation was interrupted
+     * @throws IOException if the allocation failed
+     */
+    public int[] allocatePortRange(
+            final AbstractBuild owner,
+            int start, int end, int count, boolean isConsecutive)
+    throws InterruptedException, IOException {
+        int[] allocated = new int[count];
+
+        boolean allocationFailed = true;
+        Random rnd = new Random();
+
+        // Attempt the whole allocation a few times using a brute force approach.
+        for (int trynum = 0; (allocationFailed && (trynum < MAX_TRIES)); trynum++) {
+            allocationFailed = false;
+
+            // Allocate all of the ports in the range
+            for (int offset = 0; offset < count; offset++) {
+
+                final int requestedPort;
+                if (!isConsecutive || (offset == 0)) {
+                    requestedPort = rnd.nextInt((end - start) - count) + start;
+                } else {
+                    requestedPort = allocated[0] + offset;
+                }
+                try {
+                    final int i;
+                    synchronized (this) {
+                        i = allocatePort(requestedPort);
+                        ports.put(i, owner);
+                    }
+                    allocated[offset] = i;
+                } catch (PortUnavailableException ex) {
+                    // Did not get requested port
+                    allocationFailed = true;
+                    // Free off allocated ports ready to try again
+                    for (int freeOffset = offset - 1; freeOffset >= 0; freeOffset--) {
+                        free(allocated[freeOffset]);
+                    }
+                    // Try again from the beginning.
+                    break;
+                }
+            }
+        }
+        if (allocationFailed) {
+            throw new IOException("Failed to allocate port range");
+        }
+        return allocated;
     }
 
     /**
