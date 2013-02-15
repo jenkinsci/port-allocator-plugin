@@ -100,6 +100,14 @@ public final class PortAllocationManager {
         return port;
     }
 
+	public synchronized boolean isFree(int port) {
+		AbstractBuild owner = ports.get(port);
+		if (owner == null) {
+			return true;
+		}
+		return false;
+	}
+
     public static PortAllocationManager getManager(Computer node) {
         PortAllocationManager pam;
         WeakReference<PortAllocationManager> ref = INSTANCES.get(node);
