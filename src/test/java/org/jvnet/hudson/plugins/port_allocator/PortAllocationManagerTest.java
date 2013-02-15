@@ -8,6 +8,7 @@ import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
 
 import org.jvnet.hudson.plugins.port_allocator.PortAllocationManager;
+import org.jvnet.hudson.plugins.port_allocator.PortAllocationManager.PortUnavailableException;
 import org.mockito.Mockito;
 
 import junit.framework.TestCase;
@@ -130,5 +131,45 @@ public class PortAllocationManagerTest extends TestCase {
 
 		// Ensure that free port continues without problems.
 		manager.free(port);
+	}
+
+	/**
+	 * Ensure that port allocation invokes the remote callable and
+	 * passes back the port allocated by the remote node.
+	 * @throws Throwable
+	 */
+	public void testAllocatePortRange() throws Throwable {
+		final VirtualChannel channel = Mockito.mock(VirtualChannel.class);
+		final Computer computer = Mockito.mock(Computer.class);
+		final AbstractBuild build = Mockito.mock(AbstractBuild.class);
+
+		final int mockStart = 42;
+		final int mockEnd = 48;
+		final int mockPort = 44;
+		Mockito.when(computer.getChannel()).thenReturn(channel);
+
+		Mockito.when(channel.call(Mockito.isNotNull(Callable.class)))
+								// First port succeeds
+								.thenReturn(mockPort)
+								// Second port fails
+								.thenThrow(PortUnavailableException.class)
+								// Better luck next time around
+								.thenReturn(mockPort + 2)
+								.thenReturn(mockPort + 3);
+
+		final PortAllocationManager manager = PortAllocationManager.getManager(computer);
+
+		int[] ports = manager.allocatePortRange(build, mockStart, mockEnd, 2, true);
+		assertNotNull(ports);
+		assertEquals(2, ports.length);
+		assertEquals(mockPort + 2, ports[0]);
+		assertEquals(mockPort + 3, ports[1]);
+		// We cannot confirm that second and subsequent allocations of port 42
+		// allocation will succeed because mocking allocatePort and/or Callable is
+		// difficult.
+
+		// Ensure that free port continues without problems.
+		manager.free(ports[0]);
+		manager.free(ports[1]);
 	}
 }
