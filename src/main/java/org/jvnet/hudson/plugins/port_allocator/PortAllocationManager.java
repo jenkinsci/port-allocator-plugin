@@ -144,7 +144,7 @@ public final class PortAllocationManager {
      * @param port 0 to assign a free port
      * @return port that gets assigned
      * @throws PortUnavailableException
-     *      If the specified port is not availabale
+     *      If the specified port is not available
      */
     private int allocatePort(final int port) throws InterruptedException, IOException {
         AbstractBuild owner = ports.get(port);
