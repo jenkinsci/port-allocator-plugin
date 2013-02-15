@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Computer;
+import hudson.remoting.Callable;
+import hudson.remoting.VirtualChannel;
 
 import org.jvnet.hudson.plugins.port_allocator.PortAllocationManager;
 import org.mockito.Mockito;
@@ -102,5 +104,31 @@ public class PortAllocationManagerTest extends TestCase {
 			// Ensure that junit sees the thread exception.
 			throw monitor.failure;
 		}
+	}
+
+	/**
+	 * Ensure that port allocation invokes the remote callable and
+	 * passes back the port allocated by the remote node.
+	 * @throws Throwable
+	 */
+	public void testAllocateRandom() throws Throwable {
+		final VirtualChannel channel = Mockito.mock(VirtualChannel.class);
+		final Computer computer = Mockito.mock(Computer.class);
+		final AbstractBuild build = Mockito.mock(AbstractBuild.class);
+
+		final int mockPort = 42;
+		Mockito.when(computer.getChannel()).thenReturn(channel);
+		Mockito.when(channel.call(Mockito.isNotNull(Callable.class))).thenReturn(mockPort);
+
+		final PortAllocationManager manager = PortAllocationManager.getManager(computer);
+
+		int port = manager.allocateRandom(build, mockPort);
+		assertEquals(mockPort, port);
+		// We cannot confirm that second and subsequent allocations of port 42
+		// allocation will succeed because mocking allocatePort and/or Callable is
+		// difficult.
+
+		// Ensure that free port continues without problems.
+		manager.free(port);
 	}
 }
