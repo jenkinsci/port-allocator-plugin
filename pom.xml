@@ -33,9 +33,16 @@
 
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/port-allocator-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/port-allocator-plugin.git</developerConnection>
+    <developerConnection>scm:git:ssh://git@github.com:jenkinsci/port-allocator-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/port-allocator-plugin</url>
   </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>maven.jenkins-ci.org</id>
+            <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
+        </repository>
+    </distributionManagement>
 
     <repositories>
         <repository>
