@@ -92,8 +92,6 @@ public class PortAllocator extends BuildWrapper implements ResourceActivity
                 } catch (PoolNotDefinedException e) {
                     log.warn("Unable to add resource", e);
                 }
-            } else {
-                addResource(resourceList, portType, 1);
             }
         }
         return resourceList;
