@@ -8,7 +8,7 @@
 
   <artifactId>port-allocator</artifactId>
   <packaging>hpi</packaging>
-  <version>1.8</version>
+  <version>1.9-SNAPSHOT</version>
   <name>Jenkins Port Allocator Plug-in</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Port+Allocator+Plugin</url>
 
