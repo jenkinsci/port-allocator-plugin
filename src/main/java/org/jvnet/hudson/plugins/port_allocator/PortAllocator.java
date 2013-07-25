@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  *
  * @author Rama Pulavarthi
  */
-public class PortAllocator extends BuildWrapper implements ResourceActivity
+public class PortAllocator extends BuildWrapper
 {
     private static final Log log = LogFactory.getLog(PortAllocator.class);
 
@@ -81,32 +81,6 @@ public class PortAllocator extends BuildWrapper implements ResourceActivity
                 return true;
             }
         };
-    }
-
-    public ResourceList getResourceList() {
-        ResourceList resourceList = new ResourceList();
-        for (PortType portType : ports) {
-            if (portType instanceof PooledPortType) {
-                try {
-                    addResource(resourceList, (PooledPortType) portType, DESCRIPTOR.getPoolSize(portType.name));
-                } catch (PoolNotDefinedException e) {
-                    log.warn("Unable to add resource", e);
-                }
-            }
-        }
-        return resourceList;
-    }
-
-    private void addResource(ResourceList resourceList, PooledPortType portType, int count) {
-        resourceList.w(
-            new Resource(null, "port pool " + portType.name, count)
-        );
-    }
-
-    private void addResource(ResourceList resourceList, PortType portType, int count) {
-        resourceList.w(
-            new Resource(null, "standalone port " + portType.name, count)
-        );
     }
 
     public String getDisplayName() {
