@@ -27,9 +27,7 @@ public abstract class PortType implements ExtensionPoint, Describable<PortType>,
     public final String name;
 
     protected PortType(String name) {
-        // to avoid platform difference issue in case sensitivity of environment variables,
-        // always use uppser case.
-        this.name = name.toUpperCase();
+        this.name = name;
     }
 
     /**
