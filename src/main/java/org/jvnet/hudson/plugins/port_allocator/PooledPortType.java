@@ -30,14 +30,7 @@ public class PooledPortType extends PortType {
      * Wait for a short period if no free port is available, then try again.
      */
     @Override
-    public Port allocate(
-        AbstractBuild<?, ?> build,
-        final PortAllocationManager manager,
-        int prefPort,
-        Launcher launcher,
-        BuildListener buildListener
-    ) throws IOException, InterruptedException {
-
+    public Port allocate(AbstractBuild<?, ?> build, final PortAllocationManager manager, int prefPort, Launcher launcher, BuildListener buildListener) throws IOException, InterruptedException {
         try {
             while (true) {
 

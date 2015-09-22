@@ -9,6 +9,7 @@ public class Pool {
     
     public String name;
     public String ports;
+    public boolean isGlobal;
 
     public int[] getPortsAsInt() {
 

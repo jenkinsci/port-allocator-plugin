@@ -16,6 +16,9 @@
                         <f:textbox name="pool.ports" value="${pool.ports}"
                             checkUrl="'descriptorByName/PortAllocator/checkPort?value='+this.value" />
                     </f:entry>
+                    <f:entry title="Global Visibility" help="/plugin/port-allocator/help-pool-definition-visibility.html">
+                        <f:checkbox name="pool.isGlobal" default="false" checked="${pool.isGlobal}" />
+                    </f:entry>
                     <f:entry><f:repeatableDeleteButton /></f:entry>
                 </table>
             </f:repeatable>
