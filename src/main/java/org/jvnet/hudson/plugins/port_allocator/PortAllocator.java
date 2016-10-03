@@ -135,6 +135,7 @@ public class PortAllocator extends SimpleBuildWrapper
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             Pool[] pools = req.bindParametersToList(Pool.class, "pool.").toArray(new Pool[] {});
+            this.pools.clear();
             for (Pool p : pools) {
                 p.name = checkPoolName(p.name);
                 checkPortNumbers(p.ports);
