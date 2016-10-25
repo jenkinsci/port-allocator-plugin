@@ -11,6 +11,7 @@ import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -42,14 +43,18 @@ public class PortAllocator extends SimpleBuildWrapper
 	private String pool;
 	private final List<String> pools = Lists.newArrayList();
 	private final List<String> plainports = Lists.newArrayList();
+	private final List<PortType> genericPorts = Lists.newArrayList();
 
 	private PortAllocator(PortType[] ports) {
-		this.ports.addAll(Arrays.asList(ports));
+		if (ports != null) {
+			this.ports.addAll(Arrays.asList(ports));
+		}
+
 	}
 
 	@DataBoundConstructor
 	public PortAllocator() {
-
+	// empty 
 	}
 
 	@DataBoundSetter
@@ -91,6 +96,7 @@ public class PortAllocator extends SimpleBuildWrapper
 	public String[] getPlainports() {
 		return this.plainports.toArray(new String[this.plainports.size()]);
 	}
+
 
     @Override
     public void setUp(Context context, Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener taskListener, EnvVars envVars) throws IOException, InterruptedException {
@@ -139,6 +145,7 @@ public class PortAllocator extends SimpleBuildWrapper
     @Extension
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
+    @Symbol("portallocator")
     public static final class DescriptorImpl extends Descriptor<BuildWrapper> {
 
         private List<Pool> pools = new ArrayList<Pool>();
