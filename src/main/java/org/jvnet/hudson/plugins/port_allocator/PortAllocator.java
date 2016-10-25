@@ -12,8 +12,11 @@ import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+
+import com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -34,18 +37,60 @@ public class PortAllocator extends SimpleBuildWrapper
 {
     private static final Log log = LogFactory.getLog(PortAllocator.class);
 
-    public final PortType[] ports;
+    public final List<PortType> ports = Lists.newArrayList();
 
-    private PortAllocator(PortType[] ports){
-        this.ports = ports;
-    }
+	private String pool;
+	private final List<String> pools = Lists.newArrayList();
+	private final List<String> plainports = Lists.newArrayList();
 
-    @DataBoundConstructor
-    public PortAllocator(String pool) {
-        List<PortType> ports = new ArrayList<PortType>();
-        ports.add(new PooledPortType(pool));
-        this.ports = ports.toArray(new PortType[ports.size()]);
-    }
+	private PortAllocator(PortType[] ports) {
+		this.ports.addAll(Arrays.asList(ports));
+	}
+
+	@DataBoundConstructor
+	public PortAllocator() {
+
+	}
+
+	@DataBoundSetter
+	public void setPool(String pool) {
+		if (pool != null) {
+			this.ports.add(new PooledPortType(pool));
+			this.pool = pool;
+		}
+	}
+
+	public String getPool() {
+		return this.pool;
+	}
+
+	@DataBoundSetter
+	public void setPools(String[] pools) {
+		if (pools != null) {
+			for (String pool : pools) {
+				this.ports.add(new PooledPortType(pool));
+				this.pools.add(pool);
+			}
+		}
+	}
+
+	public String[] getPools() {
+		return this.pools.toArray(new String[this.pools.size()]);
+	}
+
+	@DataBoundSetter
+	public void setPlainports(String[] plainports) {
+		if (plainports != null) {
+			for (String port : plainports) {
+				this.ports.add(new DefaultPortType(port));
+				this.plainports.add(port);
+			}
+		}
+	}
+
+	public String[] getPlainports() {
+		return this.plainports.toArray(new String[this.plainports.size()]);
+	}
 
     @Override
     public void setUp(Context context, Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener taskListener, EnvVars envVars) throws IOException, InterruptedException {
