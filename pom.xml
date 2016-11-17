@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.424</version>
+    <version>1.609.1</version>
   </parent>
 
   <artifactId>port-allocator</artifactId>
@@ -30,6 +30,10 @@
       <name>Peter Wilcsinszky</name>
     </developer>
   </developers>
+
+  <properties>
+    <workflow.version>1.8</workflow.version>
+  </properties>
 
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/port-allocator-plugin.git</connection>
@@ -60,6 +64,57 @@
 
     <dependencies>
       <dependency>
+        <groupId>org.jenkins-ci.plugins.workflow</groupId>
+        <artifactId>workflow-job</artifactId>
+        <version>${workflow.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jenkins-ci.plugins.workflow</groupId>
+        <artifactId>workflow-basic-steps</artifactId>
+        <version>${workflow.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jenkins-ci.plugins.workflow</groupId>
+        <artifactId>workflow-cps</artifactId>
+        <version>${workflow.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jenkins-ci.plugins.workflow</groupId>
+        <artifactId>workflow-durable-task-step</artifactId>
+        <version>${workflow.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency> <!-- StepConfigTester -->
+        <groupId>org.jenkins-ci.plugins.workflow</groupId>
+        <artifactId>workflow-step-api</artifactId>
+        <version>${workflow.version}</version>
+        <classifier>tests</classifier>
+        <scope>test</scope>
+      </dependency>
+      <dependency> <!-- JenkinsRuleExt -->
+        <groupId>org.jenkins-ci.plugins.workflow</groupId>
+        <artifactId>workflow-aggregator</artifactId>
+        <version>${workflow.version}</version>
+        <classifier>tests</classifier>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jenkins-ci.modules</groupId>
+        <artifactId>sshd</artifactId>
+        <version>1.6</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>1.9.0-rc1</version>
+        <type>jar</type>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-all</artifactId>
         <version>1.9.0-rc1</version>
@@ -67,4 +122,4 @@
         <scope>test</scope>
       </dependency>
     </dependencies>
-</project>  
+</project>

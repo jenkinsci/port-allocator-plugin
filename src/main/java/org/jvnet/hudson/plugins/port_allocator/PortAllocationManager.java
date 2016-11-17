@@ -1,10 +1,13 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
-import hudson.model.AbstractBuild;
+import hudson.Extension;
 import hudson.model.Computer;
+import hudson.model.Run;
 import hudson.remoting.Callable;
+import org.jenkinsci.remoting.RoleChecker;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.net.ServerSocket;
 import java.util.HashMap;
@@ -19,7 +22,8 @@ import java.util.WeakHashMap;
  * @author Rama Pulavarthi
  * @author Kohsuke Kawaguchi
  */
-public final class PortAllocationManager {
+
+public final class PortAllocationManager implements Serializable {
     private final Computer node;
 
     /** Maximum number of tries to allocate a specific port range. */
@@ -28,7 +32,7 @@ public final class PortAllocationManager {
     /**
      * Ports currently in use, to the build that uses it.
      */
-    private final Map<Integer,AbstractBuild> ports = new HashMap<Integer,AbstractBuild>();
+    private final Map<Integer, String> ports = new HashMap<Integer, String>();
 
     private static final Map<Computer, WeakReference<PortAllocationManager>> INSTANCES =
             new WeakHashMap<Computer, WeakReference<PortAllocationManager>>();
@@ -47,7 +51,7 @@ public final class PortAllocationManager {
      *      Preffered port. This method trys to assign this port, and upon failing, fall back to
      *      assigning a random port.
      */
-    public synchronized int allocateRandom(AbstractBuild owner, int prefPort) throws InterruptedException, IOException {
+    public synchronized int allocateRandom(Run<?, ?> run, int prefPort) throws InterruptedException, IOException {
         int i;
         try {
             // try to allocate preferential port,
@@ -56,7 +60,7 @@ public final class PortAllocationManager {
             // if not available, assign a random port
             i = allocatePort(0);
         }
-        ports.put(i,owner);
+        ports.put(i,run.getId());
         return i;
     }
 
@@ -64,8 +68,7 @@ public final class PortAllocationManager {
      * Allocate a continuous range of ports within specified limits.
      * The caller is responsible for freeing the individual ports within
      * the allocated range.
-     * @param portAllocator
-     * @param build the current build
+     * @param run the current build
      * @param start the first in the range of allowable ports
      * @param end the last entry in the range of allowable ports
      * @param count the number of ports to allocate
@@ -75,7 +78,7 @@ public final class PortAllocationManager {
      * @throws IOException if the allocation failed
      */
     public int[] allocatePortRange(
-            final AbstractBuild owner,
+            final Run<?, ?> run,
             int start, int end, int count, boolean isConsecutive)
     throws InterruptedException, IOException {
         int[] allocated = new int[count];
@@ -100,7 +103,7 @@ public final class PortAllocationManager {
                     final int i;
                     synchronized (this) {
                         i = allocatePort(requestedPort);
-                        ports.put(i, owner);
+                        ports.put(i, run.getId());
                     }
                     allocated[offset] = i;
                 } catch (PortUnavailableException ex) {
@@ -126,8 +129,8 @@ public final class PortAllocationManager {
      *
      * This method blocks until the port becomes available.
      */
-    public synchronized int allocate(AbstractBuild owner, int port) throws InterruptedException, IOException {
-        while(ports.get(port)!=null)
+    public synchronized int allocate(Run<?, ?> run, int port) throws InterruptedException, IOException {
+        while (ports.get(port) != null)
             wait();
 
         /*
@@ -160,13 +163,12 @@ public final class PortAllocationManager {
 //                wait(10000);
 //            }
 //        }
-        ports.put(port,owner);
+        ports.put(port,run.getId());
         return port;
     }
 
 	public synchronized boolean isFree(int port) {
-		AbstractBuild owner = ports.get(port);
-		if (owner == null) {
+		if (ports.get(port) == null) {
 			return true;
 		}
 		return false;
@@ -211,9 +213,9 @@ public final class PortAllocationManager {
      *      If the specified port is not available
      */
     private int allocatePort(final int port) throws InterruptedException, IOException {
-        AbstractBuild owner = ports.get(port);
-        if(owner!=null)
-            throw new PortUnavailableException("Owned by "+owner);
+        String id = ports.get(port);
+        if (id != null)
+            throw new PortUnavailableException("Owned by run " + id);
 
         return node.getChannel().call(new AllocateTask(port));
     }
@@ -254,5 +256,9 @@ public final class PortAllocationManager {
         }
 
         private static final long serialVersionUID = 1L;
+
+        @Override
+        public void checkRoles(RoleChecker roleChecker) throws SecurityException {
+        }
     }
 }
