@@ -63,7 +63,7 @@ public class PortAllocationWorkflowTest {
                 + "  }\n"
                 + "}"
         ));
-        j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
@@ -79,11 +79,11 @@ public class PortAllocationWorkflowTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
             "node('slave') {\n"
-                + "  wrap([$class: 'PortAllocator', pool: 'WEBLOGIC']) {\n"
+                + "   wrap([$class: 'PortAllocator', pool: 'WEBLOGIC']){\n"
                 + "  }\n"
                 + "}"
         ));
-        j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
@@ -99,23 +99,7 @@ public class PortAllocationWorkflowTest {
                 + "  }\n"
                 + "}"
         ));
-        j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
-    }
-
-    @Test
-    public void wrap_05_WithPlainPort() throws Exception {
-        j.jenkins.addNode(new DumbSlave("slave", "dummy",
-            tmp.newFolder("remoteFS").getPath(), "1", Node.Mode.NORMAL, "",
-            j.createComputerLauncher(null), RetentionStrategy.NOOP, Collections.<NodeProperty<?>>emptyList()));
-        PortAllocator.DescriptorImpl desc = j.jenkins.getDescriptorByType(PortAllocator.DescriptorImpl.class);
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition(
-            "node('slave') {\n"
-                + "  wrap([PortAllocator, plainports: ['PLAINPORT']]) {\n"
-                + "  }\n"
-                + "}"
-        ));
-        j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
 }
