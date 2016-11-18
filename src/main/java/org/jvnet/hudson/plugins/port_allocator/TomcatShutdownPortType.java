@@ -11,13 +11,17 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.net.Socket;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 
 /**
  * Tomcat shutdown port.
  *
  * @author Kohsuke Kawaguchi
  */
+@SuppressFBWarnings(value="SE_INNER_CLASS")
 public class TomcatShutdownPortType  extends PortType {
     /**
      * Shutdown magic phrase.
@@ -57,7 +61,7 @@ public class TomcatShutdownPortType  extends PortType {
                 }
 
                 try {
-                    s.getOutputStream().write(password.getBytes());
+                    s.getOutputStream().write(password.getBytes(StandardCharsets.UTF_8));
                     s.close();
                     taskListener.getLogger().println("Shutdown left-over Tomcat");
                 } catch (IOException x) {

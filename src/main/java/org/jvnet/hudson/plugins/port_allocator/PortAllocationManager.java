@@ -24,7 +24,7 @@ import java.util.WeakHashMap;
  */
 
 public final class PortAllocationManager implements Serializable {
-    private final Computer node;
+    private transient final Computer node;
 
     /** Maximum number of tries to allocate a specific port range. */
     private static final int MAX_TRIES = 100;
@@ -261,4 +261,6 @@ public final class PortAllocationManager implements Serializable {
         public void checkRoles(RoleChecker roleChecker) throws SecurityException {
         }
     }
+
+    private static final long serialVersionUID = 1L;
 }

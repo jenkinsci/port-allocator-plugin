@@ -38,7 +38,7 @@ public class PortAllocator extends SimpleBuildWrapper
 {
     private static final Log log = LogFactory.getLog(PortAllocator.class);
 
-    public final List<PortType> ports = Lists.newArrayList();
+    protected final List<PortType> ports = Lists.newArrayList();
 
 	private String pool;
 	private final List<String> pools = Lists.newArrayList();
@@ -104,8 +104,9 @@ public class PortAllocator extends SimpleBuildWrapper
 
         Computer cur = workspace.toComputer();
         Map<String,Integer> prefPortMap = new HashMap<String,Integer>();
-        if (run.getPreviousBuild() != null) {
-            AllocatedPortAction prevAlloc = run.getPreviousBuild().getAction(AllocatedPortAction.class);
+	Run<?, ?> prevBuild  = run.getPreviousBuild();
+        if (prevBuild != null) {
+            AllocatedPortAction prevAlloc = prevBuild.getAction(AllocatedPortAction.class);
             if (prevAlloc != null) {
                 // try to assign ports assigned in previous build
                 prefPortMap = prevAlloc.getPreviousAllocatedPorts();

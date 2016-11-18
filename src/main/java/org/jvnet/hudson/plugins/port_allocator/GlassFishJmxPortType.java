@@ -25,12 +25,14 @@ import java.net.SocketException;
 import java.rmi.UnmarshalException;
 import java.util.HashMap;
 import java.util.Map;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings; 
 
 /**
  * GlassFish JMX port so that runaway GF instance can be terminated.
  *
  * @author Kohsuke Kawaguchi
  */
+@SuppressFBWarnings(value="SE_INNER_CLASS")
 public class GlassFishJmxPortType extends PortType {
     /**
      * GlassFish admin user name.
@@ -48,6 +50,7 @@ public class GlassFishJmxPortType extends PortType {
         this.password = password;
     }
 
+
     @Override
     public Port allocate(Run<?, ?> run, final PortAllocationManager manager, int prefPort, final Launcher launcher, final TaskListener taskListener)
         throws IOException, InterruptedException
@@ -61,7 +64,7 @@ public class GlassFishJmxPortType extends PortType {
         /**
          * Cleans up GlassFish instance.
          */
-        final class GlassFishCleanUpTask implements Callable<Void,IOException>, Serializable {
+        class GlassFishCleanUpTask implements Callable<Void,IOException>, Serializable {
             private final TaskListener taskListener;
 
             public GlassFishCleanUpTask(TaskListener taskListener) {
