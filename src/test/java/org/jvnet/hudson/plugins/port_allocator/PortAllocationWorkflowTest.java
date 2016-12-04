@@ -39,15 +39,35 @@ public class PortAllocationWorkflowTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
             "node('slave') {\n"
-                + "  wrap([$class: 'PortAllocator', pool: 'WEBLOGIC']) {\n"
+                + "  wrap([$class: 'PortAllocator', pools: ['WEBLOGIC']]) {\n"
                 + "  }\n"
                 + "}"
         ));
         j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
     }
-    
+
     @Test
     public void wrap_02_WithExistingPool() throws Exception {
+        j.jenkins.addNode(new DumbSlave("slave", "dummy",
+            tmp.newFolder("remoteFS").getPath(), "1", Node.Mode.NORMAL, "",
+            j.createComputerLauncher(null), RetentionStrategy.NOOP, Collections.<NodeProperty<?>>emptyList()));
+        PortAllocator.DescriptorImpl desc = j.jenkins.getDescriptorByType(PortAllocator.DescriptorImpl.class);
+        Pool weblogic = new Pool();
+        weblogic.name = "WEBLOGIC";
+        weblogic.ports = "7001,8001";
+        desc.getPools().add(weblogic);
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+            "node('slave') {\n"
+                + "  wrap([$class: 'PortAllocator', pools: ['WEBLOGIC']]) {\n"
+                + "  }\n"
+                + "}"
+        ));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+    }
+
+    @Test
+    public void wrap_03_WithExistingLegacyPool() throws Exception {
         j.jenkins.addNode(new DumbSlave("slave", "dummy",
             tmp.newFolder("remoteFS").getPath(), "1", Node.Mode.NORMAL, "",
             j.createComputerLauncher(null), RetentionStrategy.NOOP, Collections.<NodeProperty<?>>emptyList()));
@@ -63,6 +83,23 @@ public class PortAllocationWorkflowTest {
                 + "  }\n"
                 + "}"
         ));
-        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
     }
+
+    @Test
+    public void wrap_04_WithPlainPort() throws Exception {
+        j.jenkins.addNode(new DumbSlave("slave", "dummy",
+            tmp.newFolder("remoteFS").getPath(), "1", Node.Mode.NORMAL, "",
+            j.createComputerLauncher(null), RetentionStrategy.NOOP, Collections.<NodeProperty<?>>emptyList()));
+        PortAllocator.DescriptorImpl desc = j.jenkins.getDescriptorByType(PortAllocator.DescriptorImpl.class);
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+            "node('slave') {\n"
+                + "  wrap([$class: 'PortAllocator', plainports: ['PLAINPORT']]) {\n"
+                + "  }\n"
+                + "}"
+        ));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+    }
+
 }
