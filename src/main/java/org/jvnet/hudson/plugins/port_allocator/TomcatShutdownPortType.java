@@ -1,22 +1,27 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.remoting.Callable;
 import net.sf.json.JSONObject;
+import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.net.Socket;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 
 /**
  * Tomcat shutdown port.
- * 
+ *
  * @author Kohsuke Kawaguchi
  */
+@SuppressFBWarnings(value="SE_INNER_CLASS")
 public class TomcatShutdownPortType  extends PortType {
     /**
      * Shutdown magic phrase.
@@ -30,18 +35,20 @@ public class TomcatShutdownPortType  extends PortType {
     }
 
     @Override
-    public Port allocate(AbstractBuild<?, ?> build, final PortAllocationManager manager, int prefPort, final Launcher launcher, final BuildListener buildListener) throws IOException, InterruptedException {
+    public Port allocate(Run<?, ?> run, final PortAllocationManager manager, int prefPort, final Launcher launcher, final TaskListener taskListener)
+        throws IOException, InterruptedException
+    {
         final int n;
         if(isFixedPort())
-            n = manager.allocate(build, getFixedPort());
+            n = manager.allocate(run, getFixedPort());
         else
-            n = manager.allocateRandom(build, prefPort);
+            n = manager.allocateRandom(run, prefPort);
 
         final class TomcatCleanUpTask implements Callable<Void,IOException>, Serializable {
-            private final BuildListener buildListener;
+            private final TaskListener taskListener;
 
-            public TomcatCleanUpTask(BuildListener buildListener) {
-                this.buildListener = buildListener;
+            public TomcatCleanUpTask(TaskListener taskListener) {
+                this.taskListener = taskListener;
             }
 
             public Void call() throws IOException {
@@ -54,16 +61,20 @@ public class TomcatShutdownPortType  extends PortType {
                 }
 
                 try {
-                    s.getOutputStream().write(password.getBytes());
+                    s.getOutputStream().write(password.getBytes(StandardCharsets.UTF_8));
                     s.close();
-                    buildListener.getLogger().println("Shutdown left-over Tomcat");
+                    taskListener.getLogger().println("Shutdown left-over Tomcat");
                 } catch (IOException x) {
-                    x.printStackTrace(buildListener.error("Failed to write to Tomcat shutdown port"));
+                    x.printStackTrace(taskListener.error("Failed to write to Tomcat shutdown port"));
                 }
                 return null;
             }
 
             private static final long serialVersionUID = 1L;
+
+            @Override
+            public void checkRoles(RoleChecker roleChecker) throws SecurityException {
+            }
         }
 
         return new Port(this) {
@@ -73,7 +84,7 @@ public class TomcatShutdownPortType  extends PortType {
 
             public void cleanUp() throws IOException, InterruptedException {
                 manager.free(n);
-                launcher.getChannel().call(new TomcatCleanUpTask(buildListener));
+                launcher.getChannel().call(new TomcatCleanUpTask(taskListener));
             }
         };
     }

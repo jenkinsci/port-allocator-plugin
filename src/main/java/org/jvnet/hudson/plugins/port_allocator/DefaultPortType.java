@@ -1,8 +1,9 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
-import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.Launcher;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
@@ -22,13 +23,15 @@ public class DefaultPortType extends PortType {
     }
 
     @Override
-    public Port allocate(AbstractBuild<?, ?> build, final PortAllocationManager manager, int prefPort, Launcher launcher, BuildListener buildListener) throws IOException, InterruptedException {
+    public Port allocate(Run<?, ?> run, final PortAllocationManager manager, int prefPort, Launcher launcher, TaskListener taskListener)
+        throws IOException, InterruptedException
+    {
         final int n;
         if(isFixedPort())
-            n = manager.allocate(build, getFixedPort());
+            n = manager.allocate(run, getFixedPort());
         else
-            n = manager.allocateRandom(build, prefPort);
-        
+            n = manager.allocateRandom(run, prefPort);
+
         return new Port(this) {
             public int get() {
                 return n;
