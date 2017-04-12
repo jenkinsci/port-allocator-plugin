@@ -6,20 +6,21 @@ package org.jvnet.hudson.plugins.port_allocator;
  * @author pepov
  */
 public class Pool {
-    
-    public String name;
-    public String ports;
 
-    public int[] getPortsAsInt() {
+	public boolean global;
+	public String name;
+	public String ports;
 
-        String[] portsItemsAsString = ports.split(",");
+	public int[] getPortsAsInt() {
 
-        int[] portsItems = new int[portsItemsAsString.length];
+		String[] portsItemsAsString = ports.split(",");
 
-        for (int i = 0; i < portsItemsAsString.length; i++) {
-            portsItems[i] = Integer.parseInt(portsItemsAsString[i]);
-        }
+		int[] portsItems = new int[portsItemsAsString.length];
 
-        return portsItems;
-    }
+		for (int i = 0; i < portsItemsAsString.length; i++) {
+			portsItems[i] = Integer.parseInt(portsItemsAsString[i]);
+		}
+
+		return portsItems;
+	}
 }

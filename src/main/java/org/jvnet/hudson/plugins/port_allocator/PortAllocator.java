@@ -4,11 +4,28 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.BuildListener;
+import hudson.model.AbstractBuild;
+import hudson.model.Computer;
+import hudson.model.Descriptor;
+import hudson.model.Executor;
 import hudson.tasks.BuildWrapper;
 import jenkins.tasks.SimpleBuildWrapper;
 import hudson.util.FormValidation;
+
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import jenkins.model.Jenkins;
+import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONObject;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jenkinsci.Symbol;
@@ -18,11 +35,6 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import com.google.common.collect.Lists;
-
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Allocates TCP Ports on a Computer for consumption and sets it as
@@ -54,7 +66,7 @@ public class PortAllocator extends SimpleBuildWrapper
 
 	@DataBoundConstructor
 	public PortAllocator() {
-	// empty 
+	// empty
 	}
 
 	@DataBoundSetter
@@ -102,6 +114,7 @@ public class PortAllocator extends SimpleBuildWrapper
     public void setUp(Context context, Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener taskListener, EnvVars envVars) throws IOException, InterruptedException {
         PrintStream logger = taskListener.getLogger();
 
+        Computer master = Jenkins.getInstance().toComputer();
         Computer cur = workspace.toComputer();
         Map<String,Integer> prefPortMap = new HashMap<String,Integer>();
 	Run<?, ?> prevBuild  = run.getPreviousBuild();
@@ -112,14 +125,22 @@ public class PortAllocator extends SimpleBuildWrapper
                 prefPortMap = prevAlloc.getPreviousAllocatedPorts();
             }
         }
+        final PortAllocationManager mpam = PortAllocationManager.getManager(master);
         final PortAllocationManager pam = PortAllocationManager.getManager(cur);
         Map<String,Integer> portMap = new HashMap<String,Integer>();
         final List<Port> allocated = new ArrayList<Port>();
 
         for (PortType pt : ports) {
-            logger.println("Allocating TCP port "+pt.name);
+        	boolean global = false;
+        	try {
+				Pool pool = PortAllocator.DESCRIPTOR.getPoolByName(pt.name);
+				global = pool.global;
+			} catch (PoolNotDefinedException e) {
+				// ignore, global = false
+			}
+            logger.println("Allocating TCP port "+pt.name + (global ? " (global)" : ""));
             int prefPort = prefPortMap.get(pt.name)== null?0:prefPortMap.get(pt.name);
-            Port p = pt.allocate(run, pam, prefPort, launcher, taskListener);
+            Port p = pt.allocate(run, global ? mpam : pam, prefPort, launcher, taskListener);
             allocated.add(p);
             portMap.put(pt.name, p.get());
             logger.println("  -> Assigned "+p.get());

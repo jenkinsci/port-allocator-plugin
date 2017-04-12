@@ -9,6 +9,9 @@
         <f:entry title="Pool definitions">
             <f:repeatable var="pool" items="${descriptor.pools}">
                 <table width="100%">
+                	<f:entry title="Global" help="/plugin/port-allocator/help-pool-definition-global.html">
+                		<f:checkbox name="pool.global" checked="${pool.global}"/>
+                	</f:entry>
                     <f:entry title="Name" help="/plugin/port-allocator/help-pool-definition-name.html">
                         <f:textbox name="pool.name" value="${pool.name}"
                             checkUrl="'descriptorByName/PortAllocator/checkName?value='+this.value" />
