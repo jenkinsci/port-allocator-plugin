@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  *
  * <p>
  * This just mediates between different Jobs running on the same Computer
- * by assigning free ports and its the jobs responsibility to open and close the ports.   
+ * by assigning free ports and its the jobs responsibility to open and close the ports.
  *
  * @author Rama Pulavarthi
  */
@@ -49,11 +49,24 @@ public class PortAllocator extends BuildWrapper
                 prefPortMap = prevAlloc.getPreviousAllocatedPorts();
             }
         }
-        final PortAllocationManager pam = PortAllocationManager.getManager(cur);
         Map<String,Integer> portMap = new HashMap<String,Integer>();
         final List<Port> allocated = new ArrayList<Port>();
 
         for (PortType pt : ports) {
+            PortAllocationManager pam = PortAllocationManagerFactory.getManager(cur);
+
+            if (pt instanceof PooledPortType) {
+                try {
+                  Pool pool = PortAllocator.DESCRIPTOR.getPoolByName(pt.name);
+
+                  if (pool.isGlobal) {
+                    pam = PortAllocationManagerFactory.CLUSTER_INSTANCE;
+                  }
+                } catch (PoolNotDefinedException e) {
+                  throw new RuntimeException("Undefined pool: " + pt.name);
+                }
+            }
+
             logger.println("Allocating TCP port "+pt.name);
             int prefPort = prefPortMap.get(pt.name)== null?0:prefPortMap.get(pt.name);
             Port p = pt.allocate(build, pam, prefPort, launcher, listener);
@@ -114,7 +127,7 @@ public class PortAllocator extends BuildWrapper
         }
 
         public List<PortTypeDescriptor> getPortTypes() {
-            return PortTypeDescriptor.LIST; 
+            return PortTypeDescriptor.LIST;
         }
 
         @Override

@@ -1,19 +1,16 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
-import java.io.IOException;
-
 import hudson.model.AbstractBuild;
 import hudson.model.Computer;
 import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
-
-import org.jvnet.hudson.plugins.port_allocator.PortAllocationManager;
-import org.jvnet.hudson.plugins.port_allocator.PortAllocationManager.PortUnavailableException;
+import junit.framework.TestCase;
+import org.jvnet.hudson.plugins.port_allocator.NodePortAllocationManager.PortUnavailableException;
 import org.mockito.Mockito;
 
-import junit.framework.TestCase;
+import java.io.IOException;
 
-public class PortAllocationManagerTest extends TestCase {
+public class NodePortAllocationManagerTest extends TestCase {
 
 	private class TestMonitor {
 		public boolean ready;
@@ -29,7 +26,7 @@ public class PortAllocationManagerTest extends TestCase {
 	public void testAllocate() throws Exception {
 		final Computer computer = Mockito.mock(Computer.class);
 		final AbstractBuild build = Mockito.mock(AbstractBuild.class);
-		final PortAllocationManager manager = PortAllocationManager.getManager(computer);
+		final NodePortAllocationManager manager = PortAllocationManagerFactory.getManager(computer);
 
 		final TestMonitor monitor = new TestMonitor();
 
@@ -121,7 +118,7 @@ public class PortAllocationManagerTest extends TestCase {
 		Mockito.when(computer.getChannel()).thenReturn(channel);
 		Mockito.when(channel.call(Mockito.isNotNull(Callable.class))).thenReturn(mockPort);
 
-		final PortAllocationManager manager = PortAllocationManager.getManager(computer);
+		final NodePortAllocationManager manager = PortAllocationManagerFactory.getManager(computer);
 
 		int port = manager.allocateRandom(build, mockPort);
 		assertEquals(mockPort, port);
@@ -157,7 +154,7 @@ public class PortAllocationManagerTest extends TestCase {
 								.thenReturn(mockPort + 2)
 								.thenReturn(mockPort + 3);
 
-		final PortAllocationManager manager = PortAllocationManager.getManager(computer);
+		final NodePortAllocationManager manager = PortAllocationManagerFactory.getManager(computer);
 
 		int[] ports = manager.allocatePortRange(build, mockStart, mockEnd, 2, true);
 		assertNotNull(ports);
