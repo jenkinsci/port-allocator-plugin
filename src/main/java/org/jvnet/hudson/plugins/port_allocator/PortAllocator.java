@@ -1,15 +1,22 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
+import hudson.EnvVars;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.tasks.BuildWrapper;
+import jenkins.tasks.SimpleBuildWrapper;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+
+import com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -22,28 +29,77 @@ import java.util.regex.Pattern;
  *
  * <p>
  * This just mediates between different Jobs running on the same Computer
- * by assigning free ports and its the jobs responsibility to open and close the ports.   
+ * by assigning free ports and its the jobs responsibility to open and close the ports.
  *
  * @author Rama Pulavarthi
  */
-public class PortAllocator extends BuildWrapper
+public class PortAllocator extends SimpleBuildWrapper
 {
     private static final Log log = LogFactory.getLog(PortAllocator.class);
 
-    public final PortType[] ports;
+    public final List<PortType> ports = Lists.newArrayList();
 
-    private PortAllocator(PortType[] ports){
-        this.ports = ports;
-    }
+	private String pool;
+	private final List<String> pools = Lists.newArrayList();
+	private final List<String> plainports = Lists.newArrayList();
+
+	private PortAllocator(PortType[] ports) {
+		this.ports.addAll(Arrays.asList(ports));
+	}
+
+	@DataBoundConstructor
+	public PortAllocator() {
+
+	}
+
+	@DataBoundSetter
+	public void setPool(String pool) {
+		if (pool != null) {
+			this.ports.add(new PooledPortType(pool));
+			this.pool = pool;
+		}
+	}
+
+	public String getPool() {
+		return this.pool;
+	}
+
+	@DataBoundSetter
+	public void setPools(String[] pools) {
+		if (pools != null) {
+			for (String pool : pools) {
+				this.ports.add(new PooledPortType(pool));
+				this.pools.add(pool);
+			}
+		}
+	}
+
+	public String[] getPools() {
+		return this.pools.toArray(new String[this.pools.size()]);
+	}
+
+	@DataBoundSetter
+	public void setPlainports(String[] plainports) {
+		if (plainports != null) {
+			for (String port : plainports) {
+				this.ports.add(new DefaultPortType(port));
+				this.plainports.add(port);
+			}
+		}
+	}
+
+	public String[] getPlainports() {
+		return this.plainports.toArray(new String[this.plainports.size()]);
+	}
 
     @Override
-    public Environment setUp(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
-        PrintStream logger = listener.getLogger();
+    public void setUp(Context context, Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener taskListener, EnvVars envVars) throws IOException, InterruptedException {
+        PrintStream logger = taskListener.getLogger();
 
-        final Computer cur = Executor.currentExecutor().getOwner();
+        Computer cur = workspace.toComputer();
         Map<String,Integer> prefPortMap = new HashMap<String,Integer>();
-        if (build.getPreviousBuild() != null) {
-            AllocatedPortAction prevAlloc = build.getPreviousBuild().getAction(AllocatedPortAction.class);
+        if (run.getPreviousBuild() != null) {
+            AllocatedPortAction prevAlloc = run.getPreviousBuild().getAction(AllocatedPortAction.class);
             if (prevAlloc != null) {
                 // try to assign ports assigned in previous build
                 prefPortMap = prevAlloc.getPreviousAllocatedPorts();
@@ -56,31 +112,19 @@ public class PortAllocator extends BuildWrapper
         for (PortType pt : ports) {
             logger.println("Allocating TCP port "+pt.name);
             int prefPort = prefPortMap.get(pt.name)== null?0:prefPortMap.get(pt.name);
-            Port p = pt.allocate(build, pam, prefPort, launcher, listener);
+            Port p = pt.allocate(run, pam, prefPort, launcher, taskListener);
             allocated.add(p);
-            portMap.put(pt.name,p.get());
+            portMap.put(pt.name, p.get());
             logger.println("  -> Assigned "+p.get());
         }
 
         // TODO: only log messages when we are blocking.
         logger.println("TCP port allocation complete");
-        build.addAction(new AllocatedPortAction(portMap));
+        run.addAction(new AllocatedPortAction(portMap));
 
-        return new Environment() {
-
-            @Override
-            public void buildEnvVars(Map<String, String> env) {
-                for (Port p : allocated)
-                    env.put(p.type.name, String.valueOf(p.get()));
-            }
-
-            @Override
-            public boolean tearDown(AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
-                for (Port p : allocated)
-                    p.cleanUp();
-                return true;
-            }
-        };
+        context.setDisposer(new CleanupDisposer(allocated));
+        for (Port p : allocated)
+            context.env(p.type.name, String.valueOf(p.get()));
     }
 
     public String getDisplayName() {
@@ -97,7 +141,7 @@ public class PortAllocator extends BuildWrapper
 
     public static final class DescriptorImpl extends Descriptor<BuildWrapper> {
 
-        private Pool[] pools = new Pool[] {};
+        private List<Pool> pools = new ArrayList<Pool>();
 
         public DescriptorImpl() {
             super(PortAllocator.class);
@@ -114,7 +158,7 @@ public class PortAllocator extends BuildWrapper
         }
 
         public List<PortTypeDescriptor> getPortTypes() {
-            return PortTypeDescriptor.LIST; 
+            return PortTypeDescriptor.LIST;
         }
 
         @Override
@@ -136,11 +180,12 @@ public class PortAllocator extends BuildWrapper
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             Pool[] pools = req.bindParametersToList(Pool.class, "pool.").toArray(new Pool[] {});
+            this.pools.clear();
             for (Pool p : pools) {
                 p.name = checkPoolName(p.name);
                 checkPortNumbers(p.ports);
+                this.pools.add(p);
             }
-            this.pools = pools;
             save();
             return super.configure(req,formData);
         }
@@ -184,7 +229,7 @@ public class PortAllocator extends BuildWrapper
             }
         }
 
-        public Pool[] getPools() {
+        public List<Pool> getPools() {
             return pools;
         }
 
@@ -199,6 +244,21 @@ public class PortAllocator extends BuildWrapper
 
         public int getPoolSize(String poolName) throws PoolNotDefinedException {
             return getPoolByName(poolName).getPortsAsInt().length;
+        }
+    }
+
+    private static class CleanupDisposer extends Disposer {
+
+        List<Port> allocated;
+
+        public CleanupDisposer(List<Port> allocated) {
+            this.allocated = allocated;
+        }
+
+        @Override
+        public void tearDown(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
+            for (Port p : allocated)
+                p.cleanUp();
         }
     }
 }

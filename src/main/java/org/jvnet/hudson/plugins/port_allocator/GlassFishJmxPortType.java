@@ -1,10 +1,11 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.remoting.Callable;
 import net.sf.json.JSONObject;
+import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -27,7 +28,7 @@ import java.util.Map;
 
 /**
  * GlassFish JMX port so that runaway GF instance can be terminated.
- * 
+ *
  * @author Kohsuke Kawaguchi
  */
 public class GlassFishJmxPortType extends PortType {
@@ -48,21 +49,23 @@ public class GlassFishJmxPortType extends PortType {
     }
 
     @Override
-    public Port allocate(AbstractBuild<?, ?> build, final PortAllocationManager manager, int prefPort, final Launcher launcher, final BuildListener buildListener) throws IOException, InterruptedException {
+    public Port allocate(Run<?, ?> run, final PortAllocationManager manager, int prefPort, final Launcher launcher, final TaskListener taskListener)
+        throws IOException, InterruptedException
+    {
         final int n;
         if(isFixedPort())
-            n = manager.allocate(build, getFixedPort());
+            n = manager.allocate(run, getFixedPort());
         else
-            n = manager.allocateRandom(build, prefPort);
+            n = manager.allocateRandom(run, prefPort);
 
         /**
          * Cleans up GlassFish instance.
          */
         final class GlassFishCleanUpTask implements Callable<Void,IOException>, Serializable {
-            private final BuildListener buildListener;
+            private final TaskListener taskListener;
 
-            public GlassFishCleanUpTask(BuildListener buildListener) {
-                this.buildListener = buildListener;
+            public GlassFishCleanUpTask(TaskListener taskListener) {
+                this.taskListener = taskListener;
             }
 
             public Void call() throws IOException {
@@ -87,23 +90,27 @@ public class GlassFishJmxPortType extends PortType {
                 } catch (UnmarshalException e) {
                     if(e.getCause() instanceof SocketException || e.getCause() instanceof IOException) {
                         // to be expected, as the above would shut down the server.
-                        buildListener.getLogger().println("GlassFish was shut down");
+                        taskListener.getLogger().println("GlassFish was shut down");
                     } else {
                         throw e;
                     }
                 } catch (MalformedObjectNameException e) {
                     throw new AssertionError(e); // impossible
                 } catch (InstanceNotFoundException e) {
-                    e.printStackTrace(buildListener.error("Unable to find J2EEServer mbean"));
+                    e.printStackTrace(taskListener.error("Unable to find J2EEServer mbean"));
                 } catch (ReflectionException e) {
-                    e.printStackTrace(buildListener.error("Unable to access J2EEServer mbean"));
+                    e.printStackTrace(taskListener.error("Unable to access J2EEServer mbean"));
                 } catch (MBeanException e) {
-                    e.printStackTrace(buildListener.error("Unable to call J2EEServer mbean"));
+                    e.printStackTrace(taskListener.error("Unable to call J2EEServer mbean"));
                 }
                 return null;
             }
 
             private static final long serialVersionUID = 1L;
+
+            @Override
+            public void checkRoles(RoleChecker roleChecker) throws SecurityException {
+            }
         }
 
         return new Port(this) {
@@ -113,7 +120,7 @@ public class GlassFishJmxPortType extends PortType {
 
             public void cleanUp() throws IOException, InterruptedException {
                 manager.free(n);
-                launcher.getChannel().call(new GlassFishCleanUpTask(buildListener));
+                launcher.getChannel().call(new GlassFishCleanUpTask(taskListener));
             }
         };
     }

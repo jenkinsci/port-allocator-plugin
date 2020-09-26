@@ -2,8 +2,9 @@ package org.jvnet.hudson.plugins.port_allocator;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -30,23 +31,14 @@ public class PooledPortType extends PortType {
      * Wait for a short period if no free port is available, then try again.
      */
     @Override
-    public Port allocate(
-        AbstractBuild<?, ?> build,
-        final PortAllocationManager manager,
-        int prefPort,
-        Launcher launcher,
-        BuildListener buildListener
-    ) throws IOException, InterruptedException {
-
+    public Port allocate(Run<?, ?> run, PortAllocationManager manager, int prefPort, Launcher launcher, TaskListener taskListener) throws IOException, InterruptedException {
         try {
             while (true) {
-
                 Pool pool = PortAllocator.DESCRIPTOR.getPoolByName(name);
-
                 synchronized (pool) {
                     for (int port : pool.getPortsAsInt()) {
                         if (manager.isFree(port)) {
-                            manager.allocate(build, port);
+                            manager.allocate(run, port);
                             return new PooledPort(this, port, manager);
                         }
                     }
