@@ -1,5 +1,7 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import hudson.model.Descriptor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -19,5 +21,7 @@ public abstract class PortTypeDescriptor extends Descriptor<PortType> {
     /**
      * All registered {@link PortTypeDescriptor}s.
      */
+    @SuppressFBWarnings(value = "MS_MUTABLE_COLLECTION_PKGPROTECT",
+                        justification = "Low risk to leave it visible outside the package")
     public static final List<PortTypeDescriptor> LIST = new ArrayList<PortTypeDescriptor>();
 }
