@@ -92,7 +92,10 @@ public class TomcatShutdownPortType  extends PortType {
 
             public void cleanUp() throws IOException, InterruptedException {
                 manager.free(n);
-                launcher.getChannel().call(new TomcatCleanUpTask(buildListener));
+                hudson.remoting.VirtualChannel channel = launcher.getChannel();
+                if (channel != null) {
+                    channel.call(new TomcatCleanUpTask(buildListener));
+                }
             }
         };
     }
