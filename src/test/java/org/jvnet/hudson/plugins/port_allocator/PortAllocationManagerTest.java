@@ -119,7 +119,7 @@ public class PortAllocationManagerTest extends TestCase {
 
 		final int mockPort = 42;
 		Mockito.when(computer.getChannel()).thenReturn(channel);
-		Mockito.when(channel.call(Mockito.isNotNull(Callable.class))).thenReturn(mockPort);
+		Mockito.when(channel.call(Mockito.isNotNull())).thenReturn(mockPort);
 
 		final PortAllocationManager manager = PortAllocationManager.getManager(computer);
 
@@ -148,7 +148,7 @@ public class PortAllocationManagerTest extends TestCase {
 		final int mockPort = 44;
 		Mockito.when(computer.getChannel()).thenReturn(channel);
 
-		Mockito.when(channel.call(Mockito.isNotNull(Callable.class)))
+		Mockito.when(channel.call(Mockito.isNotNull()))
 								// First port succeeds
 								.thenReturn(mockPort)
 								// Second port fails
