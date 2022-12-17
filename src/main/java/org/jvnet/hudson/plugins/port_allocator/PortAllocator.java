@@ -40,7 +40,12 @@ public class PortAllocator extends BuildWrapper
     public Environment setUp(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
 
-        final Computer cur = Executor.currentExecutor().getOwner();
+        final Executor currentExecutor = Executor.currentExecutor();
+        if (currentExecutor == null) {
+            logger.println("No current executor for port allocator, exiting setUp");
+            return;
+        }
+        final Computer cur = currentExecutor.getOwner();
         Map<String,Integer> prefPortMap = new HashMap<String,Integer>();
         if (build.getPreviousBuild() != null) {
             AllocatedPortAction prevAlloc = build.getPreviousBuild().getAction(AllocatedPortAction.class);
