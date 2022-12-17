@@ -118,7 +118,10 @@ public class GlassFishJmxPortType extends PortType {
 
             public void cleanUp() throws IOException, InterruptedException {
                 manager.free(n);
-                launcher.getChannel().call(new GlassFishCleanUpTask(buildListener));
+                hudson.remoting.VirtualChannel channel = launcher.getChannel();
+                if (channel != null) {
+                    channel.call(new GlassFishCleanUpTask(buildListener));
+                }
             }
         };
     }
