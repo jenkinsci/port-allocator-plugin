@@ -3,7 +3,8 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.424</version>
+    <version>4.51</version>
+    <relativePath />
   </parent>
 
   <artifactId>port-allocator</artifactId>
@@ -11,6 +12,10 @@
   <version>1.9-SNAPSHOT</version>
   <name>Jenkins Port Allocator Plug-in</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Port+Allocator+Plugin</url>
+
+  <properties>
+    <jenkins.version>2.346.3</jenkins.version>
+  </properties>
 
   <developers>
     <developer>
@@ -37,13 +42,6 @@
     <url>https://github.com/jenkinsci/port-allocator-plugin</url>
   </scm>
 
-    <distributionManagement>
-        <repository>
-            <id>maven.jenkins-ci.org</id>
-            <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
-        </repository>
-    </distributionManagement>
-
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
@@ -58,13 +56,24 @@
         </pluginRepository>
     </pluginRepositories>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-all</artifactId>
-        <version>1.9.0-rc1</version>
-        <type>jar</type>
-        <scope>test</scope>
-      </dependency>
+        <dependency>
+            <groupId>io.jenkins.tools.bom</groupId>
+            <artifactId>bom-2.346.x</artifactId>
+            <version>1750.v0071fa_4c4a_e3</version>
+            <scope>import</scope>
+            <type>pom</type>
+        </dependency>
     </dependencies>
+  </dependencyManagement>
+
 </project>  
