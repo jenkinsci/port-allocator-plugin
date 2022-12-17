@@ -65,6 +65,11 @@ public class GlassFishJmxPortType extends PortType {
                 this.buildListener = buildListener;
             }
 
+            @Override
+            public void checkRoles(final org.jenkinsci.remoting.RoleChecker checker) throws SecurityException {
+                checker.check(this, jenkins.security.Roles.SLAVE);
+            }
+
             public Void call() throws IOException {
                 JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:"+ n +"/jmxrmi");
 

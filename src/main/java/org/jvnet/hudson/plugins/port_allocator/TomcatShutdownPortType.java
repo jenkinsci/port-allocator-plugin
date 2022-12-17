@@ -44,6 +44,11 @@ public class TomcatShutdownPortType  extends PortType {
                 this.buildListener = buildListener;
             }
 
+            @Override
+            public void checkRoles(final org.jenkinsci.remoting.RoleChecker checker) throws SecurityException {
+                checker.check(this, jenkins.security.Roles.SLAVE);
+            }
+
             public Void call() throws IOException {
                 Socket s;
                 try {

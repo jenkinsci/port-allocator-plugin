@@ -33,6 +33,8 @@ public final class PortAllocationManager {
     private static final Map<Computer, WeakReference<PortAllocationManager>> INSTANCES =
             new WeakHashMap<Computer, WeakReference<PortAllocationManager>>();
 
+    private static final Random rnd = new Random();
+
     private PortAllocationManager(Computer node) {
         this.node = node;
     }
@@ -81,7 +83,6 @@ public final class PortAllocationManager {
         int[] allocated = new int[count];
 
         boolean allocationFailed = true;
-        Random rnd = new Random();
 
         // Attempt the whole allocation a few times using a brute force approach.
         for (int trynum = 0; (allocationFailed && (trynum < MAX_TRIES)); trynum++) {
@@ -251,6 +252,11 @@ public final class PortAllocationManager {
             int localPort = server.getLocalPort();
             server.close();
             return localPort;
+        }
+
+        @Override
+        public void checkRoles(final org.jenkinsci.remoting.RoleChecker checker) throws SecurityException {
+            checker.check(this, jenkins.security.Roles.SLAVE);
         }
 
         private static final long serialVersionUID = 1L;
