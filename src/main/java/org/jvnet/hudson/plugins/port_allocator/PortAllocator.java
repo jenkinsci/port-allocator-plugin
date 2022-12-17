@@ -43,12 +43,21 @@ public class PortAllocator extends BuildWrapper
         final Executor currentExecutor = Executor.currentExecutor();
         if (currentExecutor == null) {
             logger.println("No current executor for port allocator, exiting setUp");
-            return;
+            return new Environment() {
+                @Override
+                public void buildEnvVars(Map<String, String> env) {
+                }
+                @Override
+                public boolean tearDown(AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
+                    return true;
+                }
+            };
         }
         final Computer cur = currentExecutor.getOwner();
         Map<String,Integer> prefPortMap = new HashMap<String,Integer>();
-        if (build.getPreviousBuild() != null) {
-            AllocatedPortAction prevAlloc = build.getPreviousBuild().getAction(AllocatedPortAction.class);
+        AbstractBuild previousBuild = build.getPreviousBuild();
+        if (previousBuild != null) {
+            AllocatedPortAction prevAlloc = previousBuild.getAction(AllocatedPortAction.class);
             if (prevAlloc != null) {
                 // try to assign ports assigned in previous build
                 prefPortMap = prevAlloc.getPreviousAllocatedPorts();
