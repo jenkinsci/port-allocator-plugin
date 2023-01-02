@@ -11,7 +11,7 @@
   <packaging>hpi</packaging>
   <version>1.9-SNAPSHOT</version>
   <name>Jenkins Port Allocator Plug-in</name>
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Port+Allocator+Plugin</url>
+  <url>https://github.com/jenkinsci/port-allocator-plugin</url>
 
   <properties>
     <jenkins.version>2.346.3</jenkins.version>
