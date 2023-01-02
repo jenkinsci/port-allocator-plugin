@@ -66,9 +66,8 @@ public final class PortAllocationManager {
      * Allocate a continuous range of ports within specified limits.
      * The caller is responsible for freeing the individual ports within
      * the allocated range.
-     * @param portAllocator
-     * @param build the current build
-     * @param start the first in the range of allowable ports
+     * @param owner current build
+     * @param start first port in the range of allowable ports
      * @param end the last entry in the range of allowable ports
      * @param count the number of ports to allocate
      * @param isConsecutive true if the allocated ports should be consecutive
