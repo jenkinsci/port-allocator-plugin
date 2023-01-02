@@ -54,12 +54,11 @@ public abstract class PortType implements ExtensionPoint, Describable<PortType>,
     /**
      * Allocates a new port for a given build.
      *
-     * @param manager
-     *      This can be used to assign a new TCP port number.
-     * @param prefPort
-     *  The port number allocated to this type the last time.
-     * @param launcher
-     * @param buildListener
+     * @param build the build that will use the allocated port
+     * @param manager can be used to assign a new TCP port number
+     * @param prefPort port number allocated to this type the last time
+     * @param launcher launcher used to perform operations for the build
+     * @param buildListener listener that receives information about the build
      */
     public abstract Port allocate(AbstractBuild<?, ?> build, PortAllocationManager manager, int prefPort, Launcher launcher, BuildListener buildListener) throws IOException, InterruptedException;
 
