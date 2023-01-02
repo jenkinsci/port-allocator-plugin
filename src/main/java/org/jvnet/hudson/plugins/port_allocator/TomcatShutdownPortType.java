@@ -1,5 +1,7 @@
 package org.jvnet.hudson.plugins.port_allocator;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -10,6 +12,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 
 /**
@@ -44,6 +47,22 @@ public class TomcatShutdownPortType  extends PortType {
                 this.buildListener = buildListener;
             }
 
+            @Override
+            public void checkRoles(final org.jenkinsci.remoting.RoleChecker checker) throws SecurityException {
+                checker.check(this, jenkins.security.Roles.SLAVE);
+            }
+
+            @SuppressFBWarnings(value = "DM_DEFAULT_ENCODING",
+                                justification = "Read UTF-8 as first preference")
+            private byte[] getBytes(String s) {
+                byte[] bytes;
+                try {
+                    return s.getBytes("UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    return s.getBytes();
+                }
+            }
+
             public Void call() throws IOException {
                 Socket s;
                 try {
@@ -54,7 +73,7 @@ public class TomcatShutdownPortType  extends PortType {
                 }
 
                 try {
-                    s.getOutputStream().write(password.getBytes());
+                    s.getOutputStream().write(getBytes(password));
                     s.close();
                     buildListener.getLogger().println("Shutdown left-over Tomcat");
                 } catch (IOException x) {
@@ -73,7 +92,10 @@ public class TomcatShutdownPortType  extends PortType {
 
             public void cleanUp() throws IOException, InterruptedException {
                 manager.free(n);
-                launcher.getChannel().call(new TomcatCleanUpTask(buildListener));
+                hudson.remoting.VirtualChannel channel = launcher.getChannel();
+                if (channel != null) {
+                    channel.call(new TomcatCleanUpTask(buildListener));
+                }
             }
         };
     }
