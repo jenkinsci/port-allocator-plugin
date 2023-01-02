@@ -1,0 +1,16 @@
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates
+
+version: 2
+updates:
+- package-ecosystem: "maven"
+  directory: "/"
+  schedule:
+    interval: "monthly"
+  labels:
+  - dependencies
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "monthly"
+  labels:
+  - skip-changelog
