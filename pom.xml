@@ -14,7 +14,7 @@
   <url>https://github.com/jenkinsci/port-allocator-plugin</url>
 
   <properties>
-    <jenkins.version>2.346.3</jenkins.version>
+    <jenkins.version>2.375.4</jenkins.version>
   </properties>
 
   <developers>
@@ -69,8 +69,8 @@
     <dependencies>
         <dependency>
             <groupId>io.jenkins.tools.bom</groupId>
-            <artifactId>bom-2.346.x</artifactId>
-            <version>1763.v092b_8980a_f5e</version>
+            <artifactId>bom-2.375.x</artifactId>
+            <version>2102.v854b_fec19c92</version>
             <scope>import</scope>
             <type>pom</type>
         </dependency>
