@@ -25,4 +25,12 @@
     - If it is not a false positive, fix the bug, then remove the
       exclusion from this section.
    -->
+  <Match>
+    <!-- The warning is correct, the field is read without being
+         written. Relies on the callers to have set the public field
+         to a non-null value. -->
+    <Bug pattern="NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"/>
+    <Class name="org.jvnet.hudson.plugins.port_allocator.Pool"/>
+    <Field name="ports"/>
+  </Match>
 </FindBugsFilter>
