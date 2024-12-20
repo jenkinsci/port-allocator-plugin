@@ -9,7 +9,7 @@
 
   <artifactId>port-allocator</artifactId>
   <packaging>hpi</packaging>
-  <version>1.11</version>
+  <version>1.12-SNAPSHOT</version>
   <name>Jenkins Port Allocator Plug-in</name>
   <url>https://github.com/jenkinsci/port-allocator-plugin</url>
 
@@ -41,7 +41,7 @@
     <connection>scm:git:https://github.com/jenkinsci/port-allocator-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/port-allocator-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/port-allocator-plugin</url>
-    <tag>port-allocator-1.11</tag>
+    <tag>HEAD</tag>
   </scm>
 
     <repositories>
