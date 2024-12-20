@@ -10,12 +10,10 @@
             <f:repeatable var="pool" items="${descriptor.pools}">
                 <table width="100%">
                     <f:entry title="Name" help="/plugin/port-allocator/help-pool-definition-name.html">
-                        <f:textbox name="pool.name" value="${pool.name}"
-                            checkUrl="'descriptorByName/PortAllocator/checkName?value='+this.value" />
+                        <f:textbox name="pool.name" value="${pool.name}" field="name"/>
                     </f:entry>
                     <f:entry title="Ports" help="/plugin/port-allocator/help-pool-definition-ports.html">
-                        <f:textbox name="pool.ports" value="${pool.ports}"
-                            checkUrl="'descriptorByName/PortAllocator/checkPort?value='+this.value" />
+                        <f:textbox name="pool.ports" value="${pool.ports}" field="port"/>
                     </f:entry>
                     <f:entry><f:repeatableDeleteButton /></f:entry>
                 </table>
