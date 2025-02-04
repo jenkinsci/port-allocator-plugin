@@ -8,9 +8,10 @@ import hudson.model.BuildListener;
 import hudson.remoting.Callable;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
@@ -82,6 +83,7 @@ public class TomcatShutdownPortType  extends PortType {
                 return null;
             }
 
+            @Serial
             private static final long serialVersionUID = 1L;
         }
 
@@ -109,7 +111,7 @@ public class TomcatShutdownPortType  extends PortType {
             super(TomcatShutdownPortType.class);
         }
 
-        public TomcatShutdownPortType newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public TomcatShutdownPortType newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             // TODO: we need form binding from JSON
             return new TomcatShutdownPortType(
                 formData.getString("name"),
@@ -123,6 +125,7 @@ public class TomcatShutdownPortType  extends PortType {
         public static final DescriptorImpl INSTANCE = new DescriptorImpl();
     }
 
+    @Serial
     private static final long serialVersionUID = 1L;
 }
 

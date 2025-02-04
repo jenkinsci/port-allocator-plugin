@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.88</version>
+    <version>5.6</version>
     <relativePath />
   </parent>
 
@@ -14,28 +14,9 @@
   <url>https://github.com/jenkinsci/port-allocator-plugin</url>
 
   <properties>
-    <jenkins.baseline>2.452</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.4</jenkins.version>
+    <jenkins.baseline>2.479</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
   </properties>
-
-  <developers>
-    <developer>
-      <id>ramapulavarthi</id>
-      <name>Rama Pulavarthi</name>
-    </developer>
-    <developer>
-      <id>kohsuke</id>
-      <name>Kohsuke Kawaguchi</name>
-    </developer>
-    <developer>
-      <id>oldelvet</id>
-      <name>Richard Mortimer</name>
-    </developer>
-    <developer>
-      <id>pepov</id>
-      <name>Peter Wilcsinszky</name>
-    </developer>
-  </developers>
 
   <scm>
     <connection>scm:git:https://github.com/jenkinsci/port-allocator-plugin.git</connection>
@@ -71,7 +52,7 @@
         <dependency>
             <groupId>io.jenkins.tools.bom</groupId>
             <artifactId>bom-${jenkins.baseline}.x</artifactId>
-	    <version>3944.v1a_e4f8b_452db_</version>
+	    <version>4051.v78dce3ce8b_d6</version>
             <scope>import</scope>
             <type>pom</type>
         </dependency>

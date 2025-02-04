@@ -6,7 +6,7 @@ import hudson.model.BuildListener;
 import hudson.remoting.Callable;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -18,6 +18,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.SocketException;
@@ -108,6 +109,7 @@ public class GlassFishJmxPortType extends PortType {
                 return null;
             }
 
+            @Serial
             private static final long serialVersionUID = 1L;
         }
 
@@ -135,7 +137,7 @@ public class GlassFishJmxPortType extends PortType {
             super(GlassFishJmxPortType.class);
         }
 
-        public GlassFishJmxPortType newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public GlassFishJmxPortType newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             // TODO: we need form binding from JSON
             return new GlassFishJmxPortType(
                 formData.getString("name"),
@@ -150,6 +152,7 @@ public class GlassFishJmxPortType extends PortType {
         public static final DescriptorImpl INSTANCE = new DescriptorImpl();
     }
 
+    @Serial
     private static final long serialVersionUID = 1L;
 }
 
