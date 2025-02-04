@@ -18,6 +18,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.SocketException;
@@ -108,6 +109,7 @@ public class GlassFishJmxPortType extends PortType {
                 return null;
             }
 
+            @Serial
             private static final long serialVersionUID = 1L;
         }
 
@@ -150,6 +152,7 @@ public class GlassFishJmxPortType extends PortType {
         public static final DescriptorImpl INSTANCE = new DescriptorImpl();
     }
 
+    @Serial
     private static final long serialVersionUID = 1L;
 }
 

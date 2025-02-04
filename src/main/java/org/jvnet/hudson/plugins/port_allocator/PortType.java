@@ -7,6 +7,7 @@ import hudson.model.Describable;
 import hudson.model.BuildListener;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -64,5 +65,6 @@ public abstract class PortType implements ExtensionPoint, Describable<PortType>,
 
     public abstract PortTypeDescriptor getDescriptor();
 
+    @Serial
     private static final long serialVersionUID = 1L;
 }
