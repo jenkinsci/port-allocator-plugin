@@ -9,7 +9,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -132,7 +132,7 @@ public class PortAllocator extends BuildWrapper
         }
 
         @Override
-        public BuildWrapper newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public BuildWrapper newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             List<PortType> ports = Descriptor.newInstancesFromHeteroList(
                     req, formData, "ports", PortTypeDescriptor.LIST);
 
@@ -148,7 +148,7 @@ public class PortAllocator extends BuildWrapper
         }
 
         @Override
-        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+        public boolean configure(StaplerRequest2 req, JSONObject formData) throws FormException {
             Pool[] pools = req.bindParametersToList(Pool.class, "pool.").toArray(new Pool[] {});
             for (Pool p : pools) {
                 p.name = checkPoolName(p.name);

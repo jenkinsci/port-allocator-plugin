@@ -5,7 +5,7 @@ import hudson.model.BuildListener;
 import hudson.Launcher;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import java.io.IOException;
 
@@ -49,7 +49,7 @@ public class DefaultPortType extends PortType {
             super(DefaultPortType.class);
         }
 
-        public DefaultPortType newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public DefaultPortType newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             // TODO: we need form binding from JSON
             return new DefaultPortType(formData.getString("name"));
         }

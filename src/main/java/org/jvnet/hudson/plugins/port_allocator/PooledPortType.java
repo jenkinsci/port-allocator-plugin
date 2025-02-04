@@ -7,7 +7,7 @@ import hudson.model.BuildListener;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import java.io.IOException;
 
@@ -70,7 +70,7 @@ public class PooledPortType extends PortType {
             super(PooledPortType.class);
         }
 
-        public PooledPortType newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public PooledPortType newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
 
             if ("".equals(formData.getString("name"))) {
                 throw new FormException(
