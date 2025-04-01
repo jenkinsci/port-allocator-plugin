@@ -1,2 +1,0 @@
-_extends: .github
-tag-template: port-allocator-$NEXT_MINOR_VERSION
