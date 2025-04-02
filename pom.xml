@@ -9,16 +9,15 @@
 
   <artifactId>port-allocator</artifactId>
   <packaging>hpi</packaging>
-  <version>${revision}${changelist}</version>
+  <version>${changelist}</version>
   <name>Jenkins Port Allocator Plug-in</name>
   <url>https://github.com/jenkinsci/port-allocator-plugin</url>
 
   <properties>
-    <revision>1.13</revision>
-    <changelist>-SNAPSHOT</changelist>
+    <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/port-allocator-plugin</gitHubRepo>
     <jenkins.baseline>2.479</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
+    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
   </properties>
 
   <scm>
