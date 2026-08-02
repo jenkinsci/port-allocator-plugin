@@ -183,13 +183,13 @@ public class PortAllocator extends BuildWrapper
                 throw new FormException("Pool name must not be empty", "name");
             }
 
-            if (Pattern.matches("\\w+", name)) {
-                return name.toUpperCase();
-            } else {
+            if (!Pattern.matches("\\w+", name)) {
                 throw new FormException(
-                    "The name: \"" + name + "\" is invalid! It must not contain other than word characters!", "name"
+                        "The name: \"" + name + "\" is invalid! It must not contain other than word characters!", "name"
                 );
             }
+
+            return name;
         }
 
         private void checkPortNumbers(String ports) throws FormException {
@@ -204,7 +204,7 @@ public class PortAllocator extends BuildWrapper
 
         public Pool getPoolByName(String poolName) throws PoolNotDefinedException {
             for (Pool p : pools) {
-                if (p.name.toUpperCase().equals(poolName.toUpperCase())) {
+                if (p.name.equals(poolName)) {
                     return p;
                 }
             }
